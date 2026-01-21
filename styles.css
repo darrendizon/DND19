@@ -1,0 +1,121 @@
+/*
+    THEME: High Fantasy Dark Mode
+    Designed for high contrast and readability.
+*/
+
+:root {
+    --color-charcoal-dark: #121212;
+    --color-charcoal: #1f1f1f;
+    --color-charcoal-light: #2d2d2d;
+
+    --color-parchment: #e3dcd2;
+    --color-parchment-dim: #b8b0a4;
+
+    --color-gold: #d4af37;
+    --color-gold-dim: #8a7122;
+    --color-gold-glow: rgba(212, 175, 55, 0.2);
+
+    --font-main: 'Merriweather', 'Georgia', serif;
+}
+
+/* Base Styles & Typography */
+body {
+    background-color: var(--color-charcoal);
+    color: var(--color-parchment);
+    font-family: var(--font-main);
+    font-size: 18px; /* Minimum size requirement */
+    line-height: 1.6;
+}
+
+/* Custom Utility Classes for Colors (matching HTML classes) */
+.bg-charcoal { background-color: var(--color-charcoal); }
+.bg-charcoal-dark { background-color: var(--color-charcoal-dark); }
+.bg-charcoal-light { background-color: var(--color-charcoal-light); }
+
+.text-charcoal { color: var(--color-charcoal); }
+.text-parchment { color: var(--color-parchment); }
+.text-gold { color: var(--color-gold); }
+
+.border-gold { border-color: var(--color-gold); }
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--color-charcoal-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-gold-dim);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold);
+}
+
+/* Hide scrollbar utility for clean UI where needed */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Accessibility: Focus States */
+/* Ensure high visibility for keyboard navigation */
+:focus-visible {
+    outline: 3px solid var(--color-gold);
+    outline-offset: 2px;
+    box-shadow: 0 0 15px var(--color-gold-glow);
+}
+
+/* Action Button Hover Effects */
+.action-btn {
+    transition: all 0.2s ease-in-out;
+}
+.action-btn:hover, .action-btn:focus {
+    border-color: var(--color-gold);
+    box-shadow: 0 0 10px var(--color-gold-glow);
+}
+
+/* Narrative Text Styling */
+#story-container p {
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+/* Critical Hit / Fumble Text Styles */
+.crit-success {
+    color: #4ade80; /* Green-400 equivalent */
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(74, 222, 128, 0.3);
+}
+
+.crit-fail {
+    color: #f87171; /* Red-400 equivalent */
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(248, 113, 113, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile Responsiveness Adjustments */
+@media (max-width: 768px) {
+    /* Stack panels vertically on mobile */
+    main {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+    }
+
+    #narrative-panel {
+        min-height: 50vh; /* Ensure story gets space */
+    }
+
+    #stats-heading, #action-panel h2 {
+        font-size: 1rem;
+    }
+}
