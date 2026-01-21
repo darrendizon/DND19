@@ -16,14 +16,47 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-charcoal text-parchment font-serif h-screen flex flex-col overflow-hidden selection:bg-gold selection:text-charcoal">
+<body class="bg-charcoal text-parchment font-serif h-screen flex flex-col overflow-hidden selection:bg-gold selection:text-charcoal transition-colors duration-1000">
+
+    <!-- Start Screen Overlay -->
+    <div id="start-screen" class="absolute inset-0 z-50 bg-charcoal-dark flex flex-col items-center justify-center p-8 transition-opacity duration-1000">
+        <div class="max-w-2xl w-full text-center space-y-8 animate-fade-in-down">
+            <h1 class="text-4xl md:text-6xl font-bold text-gold tracking-widest uppercase mb-4 drop-shadow-lg">The Infinite Horizon</h1>
+            <p class="text-xl text-gray-300 italic">An Accessible, Endless Fantasy Adventure</p>
+
+            <div class="bg-charcoal p-8 border border-gold/30 rounded-lg shadow-2xl space-y-6">
+                <div class="flex flex-col text-left">
+                    <label for="char-name" class="text-gold font-bold mb-2">Character Name</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="char-name" placeholder="Enter your name..." class="flex-grow p-3 bg-charcoal-dark border border-gold/30 rounded text-parchment focus:border-gold outline-none">
+                        <button id="btn-random-name" class="px-4 py-2 border border-gold/50 text-gold hover:bg-gold hover:text-charcoal transition rounded" title="Generate Random Name">
+                            🎲
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button id="btn-start-game" class="px-8 py-3 bg-gold text-charcoal font-bold text-lg rounded shadow-lg hover:bg-yellow-500 hover:scale-105 transition-all transform w-full md:w-auto">
+                        Enter the Vault
+                    </button>
+                    <button id="btn-multiplayer" class="px-8 py-3 border-2 border-gold text-gold font-bold text-lg rounded shadow-lg hover:bg-gold/10 hover:scale-105 transition-all transform w-full md:w-auto">
+                        Join Multiplayer
+                    </button>
+                </div>
+            </div>
+
+             <p class="text-sm text-gray-500">
+                &copy; 2019-2026 by Darren Dizon under the direction of the California School for the Blind.
+            </p>
+        </div>
+    </div>
 
     <!--
         ACCESSIBILITY NOTE:
         The Audio Toggle is placed first in the DOM order to ensure it is the first
         interactive element users encounter when tabbing, allowing immediate control over sound.
     -->
-    <header class="p-4 border-b border-gold/30 bg-charcoal-light flex justify-between items-center z-10">
+    <header class="p-4 border-b border-gold/30 bg-charcoal-light flex justify-between items-center z-10 transition-colors duration-500">
         <h1 class="text-xl md:text-2xl font-bold text-gold tracking-wider uppercase">The Infinite Horizon</h1>
         <button id="audio-toggle" class="px-4 py-2 border-2 border-gold text-gold hover:bg-gold hover:text-charcoal transition-colors rounded focus:ring-4 focus:ring-gold/50 outline-none font-bold" aria-label="Toggle Background Music">
             Start Music 🎵
@@ -37,18 +70,18 @@
             Left Panel: Character Stats
             Using <section> for semantic structure.
         -->
-        <section id="character-panel" class="md:col-span-3 bg-charcoal-dark border-r border-gold/20 p-6 flex flex-col gap-6 overflow-y-auto" aria-labelledby="stats-heading">
+        <section id="character-panel" class="md:col-span-3 bg-charcoal-dark border-r border-gold/20 p-6 flex flex-col gap-6 overflow-y-auto transition-colors duration-500" aria-labelledby="stats-heading">
             <h2 id="stats-heading" class="text-xl font-bold text-gold border-b border-gold/50 pb-2">Character Stats</h2>
 
             <!-- Character Info -->
             <div class="space-y-4">
                 <div>
                     <p class="text-sm text-gray-400 uppercase tracking-widest">Name</p>
-                    <p class="text-lg font-bold">Kaelen the Void-Walker</p>
+                    <p id="display-char-name" class="text-lg font-bold">Unknown Hero</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-400 uppercase tracking-widest">Class</p>
-                    <p class="text-lg">Eldritch Knight (Lvl 5)</p>
+                    <p class="text-lg">Eldritch Knight</p>
                 </div>
             </div>
 
@@ -60,7 +93,7 @@
                         <span id="hp-display">42 / 42</span>
                     </div>
                     <div class="w-full bg-gray-700 h-4 rounded-full border border-gray-600">
-                        <div id="hp-bar" class="bg-red-700 h-full rounded-full" style="width: 100%;"></div>
+                        <div id="hp-bar" class="bg-red-700 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
                     </div>
                 </div>
 
@@ -76,9 +109,11 @@
                 </div>
             </div>
 
-            <!-- Decorative Image with empty alt because it adds no new info -->
-            <div class="mt-auto opacity-50">
-                <img src="https://placehold.co/400x400/262626/F0E68C?text=Character+Sigil" alt="" class="w-full rounded-full border-4 border-charcoal-light shadow-lg">
+            <!-- Stats Logic for Visuals -->
+             <div class="mt-auto opacity-50">
+                <div id="visual-artifact" class="w-full aspect-square rounded-full border-4 border-charcoal-light shadow-lg flex items-center justify-center bg-charcoal">
+                    <span class="text-6xl">🛡️</span>
+                </div>
             </div>
         </section>
 
@@ -87,23 +122,18 @@
             aria-live="polite" ensures screen readers announce updates without interrupting the user immediately if they are typing,
             but ensures they don't miss dynamic story updates.
         -->
-        <section id="narrative-panel" class="md:col-span-6 bg-charcoal p-8 flex flex-col relative overflow-y-auto scrollbar-hide">
+        <section id="narrative-panel" class="md:col-span-6 bg-charcoal p-8 flex flex-col relative overflow-y-auto scrollbar-hide transition-colors duration-500">
             <h2 class="sr-only">Narrative</h2> <!-- Hidden heading for screen reader navigation -->
 
             <div id="story-container" class="flex-grow flex flex-col justify-end space-y-6 pb-24">
                 <!-- Dynamic story text gets injected here -->
-                <p class="italic text-gray-500 text-center mt-auto">Initializing world generation...</p>
             </div>
 
             <!-- Live Region for Screen Readers -->
-            <!-- We keep this visually hidden or part of the visible text.
-                 Since we append text to the story container, we can also have a dedicated region for the *latest* update if we want purely status updates,
-                 but for a text game, reading the new paragraph is usually handled by the append.
-                 However, to ensure strict compliance with the prompt's request for aria-live logic: -->
             <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
             <!-- Floating Controls for Narrative -->
-            <div class="sticky bottom-0 left-0 right-0 flex justify-center pb-4 pt-12 bg-gradient-to-t from-charcoal to-transparent">
+            <div class="sticky bottom-0 left-0 right-0 flex justify-center pb-4 pt-12 bg-gradient-to-t from-charcoal to-transparent transition-colors duration-500" id="narrative-fade">
                  <button id="repeat-tts" class="bg-charcoal-light border border-gold/40 text-sm px-4 py-2 rounded-full hover:bg-gold hover:text-charcoal transition flex items-center gap-2 shadow-lg">
                     <span>🔊 Repeat Description</span>
                  </button>
@@ -114,37 +144,24 @@
             Right Panel: Action Menu
             <nav> implies a navigation section, fitting for game controls/menus.
         -->
-        <nav id="action-panel" class="md:col-span-3 bg-charcoal-dark border-l border-gold/20 p-6 flex flex-col gap-4" aria-label="Game Actions">
+        <nav id="action-panel" class="md:col-span-3 bg-charcoal-dark border-l border-gold/20 p-6 flex flex-col gap-4 transition-colors duration-500" aria-label="Game Actions">
             <h2 class="text-xl font-bold text-gold border-b border-gold/50 pb-2 mb-4">Actions</h2>
 
-            <div class="grid grid-cols-1 gap-4">
-                <button id="btn-attack" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-red-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
-                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">⚔️ Attack</span>
-                    <span class="block text-sm text-gray-400 mt-1">Strike with your Runeblade.</span>
-                </button>
-
-                <button id="btn-investigate" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-blue-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
-                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">🔍 Investigate</span>
-                    <span class="block text-sm text-gray-400 mt-1">Search for traps or loot.</span>
-                </button>
-
-                <button id="btn-spell" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-purple-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
-                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">✨ Cast Spell</span>
-                    <span class="block text-sm text-gray-400 mt-1">Unleash arcane energy.</span>
-                </button>
+            <div id="actions-grid" class="grid grid-cols-1 gap-4">
+               <!-- Buttons generated by JS -->
             </div>
 
             <div class="mt-auto p-4 bg-charcoal border border-gold/10 rounded">
                 <h3 class="text-gold font-bold mb-2">Game Log</h3>
                 <ul id="game-log-list" class="text-xs space-y-2 text-gray-400 font-mono h-32 overflow-y-auto">
-                    <li>> System initialized.</li>
+                    <li>> Awaiting user input...</li>
                 </ul>
             </div>
         </nav>
 
     </main>
 
-    <footer class="p-4 border-t border-gold/30 bg-charcoal-light text-center text-sm text-gray-400 z-10">
+    <footer class="p-4 border-t border-gold/30 bg-charcoal-light text-center text-sm text-gray-400 z-10 transition-colors duration-500">
         <p>
             &copy; 2019-2026 by Darren Dizon under the direction of the California School for the Blind.
             <a href="https://csb-cde.ca.gov/about/events/dayofcode.aspx" target="_blank" rel="noopener noreferrer" class="text-gold hover:underline font-bold ml-1">
@@ -153,11 +170,19 @@
         </p>
     </footer>
 
-    <!-- Background Audio Element -->
-    <!-- Using a placeholder loop source. In a real app, this would be a local file. -->
-    <audio id="bg-music" loop>
+    <!-- Background Audio Elements -->
+    <audio id="bg-music-main" loop>
         <source src="https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
+    </audio>
+    <audio id="bg-music-battle" loop>
+         <!-- Placeholder for battle music, using a different track or same one with higher rate -->
+        <source src="https://cdn.pixabay.com/audio/2022/03/09/audio_c8c8a73467.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sfx-win">
+         <source src="https://cdn.pixabay.com/audio/2022/03/24/audio_34b0704747.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sfx-hit">
+         <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a73467.mp3" type="audio/mpeg">
     </audio>
 
     <script src="script.js"></script>
