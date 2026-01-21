@@ -2,7 +2,7 @@ import sqlite3
 import random
 import uuid
 import json
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, closing
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
@@ -149,19 +149,19 @@ def start_game():
     player_id = str(uuid.uuid4())
     world_seed = random.randint(1, 1000000)
 
-    conn = get_db()
-    cursor = conn.cursor()
+    with closing(get_db()) as conn:
+        cursor = conn.cursor()
 
-    # Initialize Player
-    cursor.execute("INSERT INTO players (id, world_seed) VALUES (?, ?)", (player_id, world_seed))
+        # Initialize Player
+        cursor.execute("INSERT INTO players (id, world_seed) VALUES (?, ?)", (player_id, world_seed))
 
-    # Initialize GameState
-    cursor.execute("""
-        INSERT INTO gamestate (player_id, current_hp, max_hp, ac, spell_slots, max_spell_slots, current_room_id)
-        VALUES (?, 42, 42, 18, 3, 3, 1)
-    """, (player_id,))
+        # Initialize GameState
+        cursor.execute("""
+            INSERT INTO gamestate (player_id, current_hp, max_hp, ac, spell_slots, max_spell_slots, current_room_id)
+            VALUES (?, 42, 42, 18, 3, 3, 1)
+        """, (player_id,))
 
-    conn.commit()
+        conn.commit()
 
     # Generate First Room
     content = generate_room_content(world_seed + 1, 0) # room_id = 1
@@ -185,69 +185,69 @@ def start_game():
 
 @app.post("/action", response_model=RoomResponse)
 def handle_action(request: ActionRequest):
-    conn = get_db()
-    cursor = conn.cursor()
+    with closing(get_db()) as conn:
+        cursor = conn.cursor()
 
-    # Fetch State
-    row = cursor.execute("""
-        SELECT p.world_seed, p.wins, g.current_hp, g.max_hp, g.ac, g.spell_slots, g.max_spell_slots, g.current_room_id
-        FROM gamestate g
-        JOIN players p ON g.player_id = p.id
-        WHERE g.player_id = ?
-    """, (request.player_id,)).fetchone()
+        # Fetch State
+        row = cursor.execute("""
+            SELECT p.world_seed, p.wins, g.current_hp, g.max_hp, g.ac, g.spell_slots, g.max_spell_slots, g.current_room_id
+            FROM gamestate g
+            JOIN players p ON g.player_id = p.id
+            WHERE g.player_id = ?
+        """, (request.player_id,)).fetchone()
 
-    if not row:
-        raise HTTPException(status_code=404, detail="Player not found")
+        if not row:
+            raise HTTPException(status_code=404, detail="Player not found")
 
-    world_seed, wins, hp, max_hp, ac, slots, max_slots, room_id = row
+        world_seed, wins, hp, max_hp, ac, slots, max_slots, room_id = row
 
-    difficulty = calculate_difficulty(wins)
-    hp_change = 0
-    log_msg = ""
-    next_room_id = room_id
+        difficulty = calculate_difficulty(wins)
+        hp_change = 0
+        log_msg = ""
+        next_room_id = room_id
 
-    # ACTION LOGIC
-    # Uses random but logic logic resides here (The Brain)
-    roll = random.randint(1, 20)
+        # ACTION LOGIC
+        # Uses random but logic logic resides here (The Brain)
+        roll = random.randint(1, 20)
 
-    if request.action_type == "attack":
-        dc = 12 * difficulty # Harder as you win
-        if roll >= dc:
-            log_msg = f"CRITICAL HIT! (Roll: {roll}). You defeat the enemy!"
-            wins += 1
-            next_room_id += 1 # Advance
-        else:
-            damage = int(2 * difficulty)
-            hp_change = -damage
-            hp -= damage
-            log_msg = f"MISS! (Roll: {roll}). The enemy counters, dealing {damage} damage."
+        if request.action_type == "attack":
+            dc = 12 * difficulty # Harder as you win
+            if roll >= dc:
+                log_msg = f"CRITICAL HIT! (Roll: {roll}). You defeat the enemy!"
+                wins += 1
+                next_room_id += 1 # Advance
+            else:
+                damage = int(2 * difficulty)
+                hp_change = -damage
+                hp -= damage
+                log_msg = f"MISS! (Roll: {roll}). The enemy counters, dealing {damage} damage."
 
-    elif request.action_type == "investigate":
-        if roll > 15:
-            log_msg = "You find a hidden cache of supplies! (+2 HP)"
-            hp_change = 2
-            hp = min(hp + 2, max_hp)
-        else:
-            log_msg = "You find nothing but dust."
+        elif request.action_type == "investigate":
+            if roll > 15:
+                log_msg = "You find a hidden cache of supplies! (+2 HP)"
+                hp_change = 2
+                hp = min(hp + 2, max_hp)
+            else:
+                log_msg = "You find nothing but dust."
 
-    elif request.action_type == "spell":
-        if slots > 0:
-            slots -= 1
-            log_msg = "Your spell blasts the area with arcane force! The path clears."
-            wins += 1 # Treating spell as auto-win for simplicity for now, or simplify logic
-            next_room_id += 1
-        else:
-            log_msg = "You are out of spell slots! Nothing happens."
+        elif request.action_type == "spell":
+            if slots > 0:
+                slots -= 1
+                log_msg = "Your spell blasts the area with arcane force! The path clears."
+                wins += 1 # Treating spell as auto-win for simplicity for now, or simplify logic
+                next_room_id += 1
+            else:
+                log_msg = "You are out of spell slots! Nothing happens."
 
-    # Update DB
-    cursor.execute("""
-        UPDATE gamestate
-        SET current_hp = ?, spell_slots = ?, current_room_id = ?
-        WHERE player_id = ?
-    """, (hp, slots, next_room_id, request.player_id))
+        # Update DB
+        cursor.execute("""
+            UPDATE gamestate
+            SET current_hp = ?, spell_slots = ?, current_room_id = ?
+            WHERE player_id = ?
+        """, (hp, slots, next_room_id, request.player_id))
 
-    cursor.execute("UPDATE players SET wins = ? WHERE id = ?", (wins, request.player_id))
-    conn.commit()
+        cursor.execute("UPDATE players SET wins = ? WHERE id = ?", (wins, request.player_id))
+        conn.commit()
 
     # Generate Next Room (if moved) or Current Room Content
     # If we moved, use next room ID. If not, same room ID.
