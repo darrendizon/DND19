@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 # --- DATA MODELS ---
@@ -130,6 +131,18 @@ def generate_room_content(seed: int, wins: int):
     }
 
 # --- API ENDPOINTS ---
+
+@app.get("/")
+async def read_root():
+    return FileResponse("index.html")
+
+@app.get("/styles.css")
+async def read_css():
+    return FileResponse("styles.css")
+
+@app.get("/script.js")
+async def read_js():
+    return FileResponse("script.js")
 
 @app.post("/start", response_model=RoomResponse)
 def start_game():
