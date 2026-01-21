@@ -5,6 +5,7 @@ import json
 from contextlib import asynccontextmanager, closing
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Body
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -49,7 +50,7 @@ def init_db():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
+    await run_in_threadpool(init_db)
     yield
 
 app = FastAPI(lifespan=lifespan)
