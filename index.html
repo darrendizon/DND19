@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Obsidian Vault - Accessible D&D Adventure</title>
+
+    <!-- Tailwind CSS for utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Google Fonts: Merriweather for that fantasy book feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-charcoal text-parchment font-serif h-screen flex flex-col overflow-hidden selection:bg-gold selection:text-charcoal">
+
+    <!--
+        ACCESSIBILITY NOTE:
+        The Audio Toggle is placed first in the DOM order to ensure it is the first
+        interactive element users encounter when tabbing, allowing immediate control over sound.
+    -->
+    <header class="p-4 border-b border-gold/30 bg-charcoal-light flex justify-between items-center z-10">
+        <h1 class="text-xl md:text-2xl font-bold text-gold tracking-wider uppercase">The Infinite Horizon</h1>
+        <button id="audio-toggle" class="px-4 py-2 border-2 border-gold text-gold hover:bg-gold hover:text-charcoal transition-colors rounded focus:ring-4 focus:ring-gold/50 outline-none font-bold" aria-label="Toggle Background Music">
+            Start Music 🎵
+        </button>
+    </header>
+
+    <!-- Main Game Layout: 3 Columns -->
+    <main class="flex-grow grid grid-cols-1 md:grid-cols-12 gap-0 h-full relative">
+
+        <!--
+            Left Panel: Character Stats
+            Using <section> for semantic structure.
+        -->
+        <section id="character-panel" class="md:col-span-3 bg-charcoal-dark border-r border-gold/20 p-6 flex flex-col gap-6 overflow-y-auto" aria-labelledby="stats-heading">
+            <h2 id="stats-heading" class="text-xl font-bold text-gold border-b border-gold/50 pb-2">Character Stats</h2>
+
+            <!-- Character Info -->
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-400 uppercase tracking-widest">Name</p>
+                    <p class="text-lg font-bold">Kaelen the Void-Walker</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400 uppercase tracking-widest">Class</p>
+                    <p class="text-lg">Eldritch Knight (Lvl 5)</p>
+                </div>
+            </div>
+
+            <!-- Vitals -->
+            <div class="space-y-4" role="group" aria-label="Vitals">
+                <div>
+                    <div class="flex justify-between items-end mb-1">
+                        <span class="text-gold font-bold">HP</span>
+                        <span id="hp-display">42 / 42</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-4 rounded-full border border-gray-600">
+                        <div id="hp-bar" class="bg-red-700 h-full rounded-full" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-charcoal p-3 border border-gold/30 rounded text-center">
+                        <span class="block text-sm text-gold">AC</span>
+                        <span class="text-2xl font-bold">18</span>
+                    </div>
+                    <div class="bg-charcoal p-3 border border-gold/30 rounded text-center">
+                        <span class="block text-sm text-gold">Spell Slots</span>
+                        <span id="spell-slots" class="text-2xl font-bold">3/3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decorative Image with empty alt because it adds no new info -->
+            <div class="mt-auto opacity-50">
+                <img src="https://placehold.co/400x400/262626/F0E68C?text=Character+Sigil" alt="" class="w-full rounded-full border-4 border-charcoal-light shadow-lg">
+            </div>
+        </section>
+
+        <!--
+            Center Panel: The Narrative Window
+            aria-live="polite" ensures screen readers announce updates without interrupting the user immediately if they are typing,
+            but ensures they don't miss dynamic story updates.
+        -->
+        <section id="narrative-panel" class="md:col-span-6 bg-charcoal p-8 flex flex-col relative overflow-y-auto scrollbar-hide">
+            <h2 class="sr-only">Narrative</h2> <!-- Hidden heading for screen reader navigation -->
+
+            <div id="story-container" class="flex-grow flex flex-col justify-end space-y-6 pb-24">
+                <!-- Dynamic story text gets injected here -->
+                <p class="italic text-gray-500 text-center mt-auto">Initializing world generation...</p>
+            </div>
+
+            <!-- Live Region for Screen Readers -->
+            <!-- We keep this visually hidden or part of the visible text.
+                 Since we append text to the story container, we can also have a dedicated region for the *latest* update if we want purely status updates,
+                 but for a text game, reading the new paragraph is usually handled by the append.
+                 However, to ensure strict compliance with the prompt's request for aria-live logic: -->
+            <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+            <!-- Floating Controls for Narrative -->
+            <div class="sticky bottom-0 left-0 right-0 flex justify-center pb-4 pt-12 bg-gradient-to-t from-charcoal to-transparent">
+                 <button id="repeat-tts" class="bg-charcoal-light border border-gold/40 text-sm px-4 py-2 rounded-full hover:bg-gold hover:text-charcoal transition flex items-center gap-2 shadow-lg">
+                    <span>🔊 Repeat Description</span>
+                 </button>
+            </div>
+        </section>
+
+        <!--
+            Right Panel: Action Menu
+            <nav> implies a navigation section, fitting for game controls/menus.
+        -->
+        <nav id="action-panel" class="md:col-span-3 bg-charcoal-dark border-l border-gold/20 p-6 flex flex-col gap-4" aria-label="Game Actions">
+            <h2 class="text-xl font-bold text-gold border-b border-gold/50 pb-2 mb-4">Actions</h2>
+
+            <div class="grid grid-cols-1 gap-4">
+                <button id="btn-attack" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-red-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
+                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">⚔️ Attack</span>
+                    <span class="block text-sm text-gray-400 mt-1">Strike with your Runeblade.</span>
+                </button>
+
+                <button id="btn-investigate" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-blue-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
+                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">🔍 Investigate</span>
+                    <span class="block text-sm text-gray-400 mt-1">Search for traps or loot.</span>
+                </button>
+
+                <button id="btn-spell" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-purple-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
+                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">✨ Cast Spell</span>
+                    <span class="block text-sm text-gray-400 mt-1">Unleash arcane energy.</span>
+                </button>
+            </div>
+
+            <div class="mt-auto p-4 bg-charcoal border border-gold/10 rounded">
+                <h3 class="text-gold font-bold mb-2">Game Log</h3>
+                <ul id="game-log-list" class="text-xs space-y-2 text-gray-400 font-mono h-32 overflow-y-auto">
+                    <li>> System initialized.</li>
+                </ul>
+            </div>
+        </nav>
+
+    </main>
+
+    <!-- Background Audio Element -->
+    <!-- Using a placeholder loop source. In a real app, this would be a local file. -->
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
