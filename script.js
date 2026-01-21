@@ -1,13 +1,87 @@
 /**
  * Dungeons & Dragons Accessible Adventure Engine (Full-Stack Client)
  *
- * Connected to Python/FastAPI Backend for Infinite Procedural Generation.
+ * Fully Client-Side Implementation with Local Logic.
  */
 
 // --- STATE MANAGEMENT ---
 
-let currentPlayerId = null;
-let currentGameState = null;
+const gameState = {
+    hp: 42,
+    maxHp: 42,
+    spellSlots: 3,
+    maxSpellSlots: 3,
+    biome: 'tundra', // Default
+    turn: 0
+};
+
+// --- DATA: BIOMES & NARRATIVES ---
+
+const BIOMES = ['tundra', 'veins', 'clockwork', 'glass', 'archipelago', 'marsh'];
+
+const NARRATIVES = {
+    tundra: {
+        intro: "You stand amidst the frozen wastes. The wind howls like a dying beast.",
+        rooms: [
+            "A frozen lake cracks beneath your feet, revealing dark depths below.",
+            "Icicles hang like daggers from the cliffs, glinting in the pale light.",
+            "Snow drifts pile high against ruined stone structures of a forgotten age.",
+            "The air is so cold it burns your lungs. A shadow moves in the distance."
+        ]
+    },
+    veins: {
+        intro: "You descend into the deep earth, where bioluminescent veins pulse in the walls.",
+        rooms: [
+            "Glowing blue veins thump rhythmically in the rock, lighting your path.",
+            "The tunnel narrows, and the air grows thick with the scent of ozone.",
+            "Crystal formations chime softly as you pass, vibrating with energy.",
+            "A cavern opens up, revealing a vast underground network of glowing roots."
+        ]
+    },
+    clockwork: {
+        intro: "You enter a realm of gears and steam. The ticking of a giant clock fills the air.",
+        rooms: [
+            "Giant brass gears turn slowly in the walls, grinding with the weight of time.",
+            "Steam hisses from copper pipes, obscuring your vision.",
+            "Mechanical spiders scuttle along the ceiling, watching you with glass eyes.",
+            "The floor is a mesh of grating, looking down into an infinite machine."
+        ]
+    },
+    glass: {
+        intro: "You step onto a plain of shattered glass. The sky is a dull, featureless grey.",
+        rooms: [
+            "Shard-towers rise into the grey sky, reflecting nothing.",
+            "The ground crunches beneath your boots. Every step is a risk.",
+            "Mirrors float in the air, showing you reflections of things that aren't there.",
+            "A storm of glass dust approaches, cutting the air."
+        ]
+    },
+    archipelago: {
+        intro: "Islands float in a void of purple nebula. Gravity is a suggestion here.",
+        rooms: [
+            "You leap from one floating rock to another, the void stretching infinitely below.",
+            "Strange, winged creatures glide on the ether currents.",
+            " ancient ruins float by, defying gravity.",
+            "The stars feel close enough to touch in this place."
+        ]
+    },
+    marsh: {
+        intro: "A thick, green fog clings to the swamp. The ground squelches underfoot.",
+        rooms: [
+            "Twisted trees reach out with moss-covered branches.",
+            "Bubbles rise from the murky water, popping with a noxious smell.",
+            "Fireflies dance in the darkness, leading you astray.",
+            "Something large moves in the water nearby."
+        ]
+    }
+};
+
+const ENCOUNTERS = [
+    { name: "Shadow Wolf", hp: 10, damage: 4 },
+    { name: "Crystal Golem", hp: 15, damage: 3 },
+    { name: "Clockwork Soldier", hp: 12, damage: 5 },
+    { name: "Void Wisp", hp: 8, damage: 6 }
+];
 
 // --- DOM ELEMENTS ---
 
@@ -20,193 +94,322 @@ const ui = {
     audioToggle: document.getElementById('audio-toggle'),
     bgMusic: document.getElementById('bg-music'),
     gameLog: document.getElementById('game-log-list'),
-
-    // Actions Container
     actionPanel: document.getElementById('action-panel').querySelector('div.grid'),
-    btnRepeat: document.getElementById('repeat-tts')
+    btnRepeat: document.getElementById('repeat-tts'),
+    btnAbout: document.getElementById('btn-about'),
+    btnCreateAccount: document.getElementById('btn-create-account'),
+    aboutModal: document.getElementById('about-modal'),
+    btnCloseAbout: document.getElementById('btn-close-about'),
+    aboutContent: document.getElementById('about-content')
 };
 
-const API_BASE = "http://localhost:8000";
+// --- CORE GAME LOGIC ---
 
-// --- ACCESSIBILITY & AUDIO ENGINE ---
+function startGame() {
+    gameState.hp = gameState.maxHp;
+    gameState.spellSlots = gameState.maxSpellSlots;
+    gameState.biome = BIOMES[Math.floor(Math.random() * BIOMES.length)];
+    gameState.turn = 0;
+
+    // Initial Render
+    applyTheme(gameState.biome);
+    updateStats();
+
+    const narrative = NARRATIVES[gameState.biome].intro;
+    updateNarrative(narrative);
+    generateOptions();
+
+    // Attempt to start music if allowed, otherwise waiting for user interaction
+    // Browser autoplay policy might block this initially.
+}
+
+function handleAction(type) {
+    gameState.turn++;
+    let resultText = "";
+    let logText = "";
+    let hpChange = 0;
+
+    // 1. Process Action
+    if (type === 'attack') {
+        const hit = Math.random() > 0.2; // 80% hit chance
+        if (hit) {
+            const dmg = Math.floor(Math.random() * 6) + 4;
+            resultText = `You strike with your blade, dealing ${dmg} damage!`;
+            logText = `Attack: Hit for ${dmg} dmg.`;
+            playSound('attack');
+        } else {
+            resultText = "You swing your weapon, but the enemy dodges!";
+            logText = "Attack: Miss.";
+            playSound('miss');
+        }
+    } else if (type === 'investigate') {
+        const found = Math.random() > 0.5;
+        if (found) {
+            resultText = "You find a hidden cache of supplies! You feel revitalized.";
+            hpChange = 5;
+            logText = "Investigate: Found supplies (+5 HP).";
+            playSound('powerup');
+        } else {
+            resultText = "You search the area but find nothing of interest.";
+            logText = "Investigate: Nothing found.";
+        }
+    } else if (type === 'spell') {
+        if (gameState.spellSlots > 0) {
+            gameState.spellSlots--;
+            const dmg = Math.floor(Math.random() * 8) + 8;
+            resultText = `You unleash a bolt of arcane energy! It crackles with power, dealing ${dmg} damage.`;
+            logText = `Spell: Cast for ${dmg} dmg.`;
+            playSound('spell');
+        } else {
+            resultText = "You are out of spell slots! The spell fizzles.";
+            logText = "Spell: Fizzled (No slots).";
+            playSound('fail');
+        }
+    } else if (type === 'travel') {
+        // Change Biome
+        const currentIdx = BIOMES.indexOf(gameState.biome);
+        let nextIdx = (currentIdx + 1) % BIOMES.length;
+        // Randomize slightly
+        if (Math.random() > 0.5) nextIdx = Math.floor(Math.random() * BIOMES.length);
+
+        gameState.biome = BIOMES[nextIdx];
+        resultText = "You travel to a new region...";
+        logText = `Travel: Moved to ${gameState.biome}.`;
+
+        applyTheme(gameState.biome);
+        changeMusic();
+    }
+
+    // 2. Enemy Retaliation (Random Event)
+    if (Math.random() > 0.3) {
+        const enemyDmg = Math.floor(Math.random() * 5) + 1;
+        hpChange -= enemyDmg;
+        resultText += ` A shadow strikes back, dealing ${enemyDmg} damage!`;
+        logText += ` | Took ${enemyDmg} dmg.`;
+        triggerHaptic(500); // Damage vibration
+    }
+
+    // 3. Update State
+    gameState.hp += hpChange;
+    if (gameState.hp > gameState.maxHp) gameState.hp = gameState.maxHp;
+    if (gameState.hp <= 0) {
+        gameState.hp = 0;
+        resultText += " You have fallen in battle...";
+        // Simple respawn logic for now
+        setTimeout(() => {
+            alert("You have died. Resurrecting...");
+            startGame();
+        }, 2000);
+    }
+    updateStats();
+
+    // 4. Update Narrative
+    // Combine action result with a new random room description
+    const roomDesc = NARRATIVES[gameState.biome].rooms[Math.floor(Math.random() * NARRATIVES[gameState.biome].rooms.length)];
+    const fullText = `${resultText} ${roomDesc}`;
+
+    let textType = 'normal';
+    if (logText.includes('Hit') || logText.includes('Found')) textType = 'crit'; // Positive
+    if (logText.includes('Miss') || logText.includes('Fizzled') || logText.includes('Took')) textType = 'fail'; // Negative/Mixed
+
+    updateNarrative(fullText, textType, logText);
+    generateOptions();
+}
+
+function generateOptions() {
+    const options = [
+        { label: "⚔️ Attack", description: "Strike with your Runeblade.", action_type: "attack" },
+        { label: "🔍 Investigate", description: "Search for traps or loot.", action_type: "investigate" },
+        { label: "✨ Cast Spell", description: "Unleash arcane energy.", action_type: "spell" },
+        { label: "🦶 Travel", description: "Move to a new area.", action_type: "travel" }
+    ];
+    renderButtons(options);
+}
+
+// --- RENDERING & UI HELPER FUNCTIONS ---
+
+function renderButtons(options) {
+    ui.actionPanel.innerHTML = "";
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-charcoal-light transition-all rounded text-left focus:ring-2 focus:ring-gold mb-2";
+        // Remove Emoji for aria-label if desired, but here we keep them in visual text.
+        // User asked: "Refrain from using Emoji's in the HTML" for the ABOUT POP-UP.
+        // For buttons, emojis are often used as icons. I will keep them here unless requested otherwise for buttons.
+        btn.innerHTML = `
+            <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">${opt.label}</span>
+            <span class="block text-sm text-gray-400 mt-1">${opt.description}</span>
+        `;
+        btn.onclick = () => handleAction(opt.action_type);
+        ui.actionPanel.appendChild(btn);
+    });
+}
+
+function updateStats() {
+    ui.hpDisplay.textContent = `${gameState.hp} / ${gameState.maxHp}`;
+    const hpPercent = (gameState.hp / gameState.maxHp) * 100;
+    ui.hpBar.style.width = `${hpPercent}%`;
+    ui.spellSlots.textContent = `${gameState.spellSlots}/${gameState.maxSpellSlots}`;
+}
+
+function updateNarrative(text, type = 'normal', logUpdate = null) {
+    const p = document.createElement('p');
+    p.textContent = text;
+    if (type === 'crit') p.classList.add('crit-success');
+    if (type === 'fail') p.classList.add('crit-fail');
+
+    ui.storyContainer.appendChild(p);
+
+    requestAnimationFrame(() => {
+        ui.storyContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        document.getElementById('narrative-panel').scrollTop = document.getElementById('narrative-panel').scrollHeight;
+    });
+
+    ui.liveRegion.textContent = "";
+    setTimeout(() => {
+        ui.liveRegion.textContent = text;
+    }, 50);
+
+    speakText(text);
+
+    if (logUpdate) {
+        const li = document.createElement('li');
+        li.textContent = `> ${logUpdate}`;
+        ui.gameLog.insertBefore(li, ui.gameLog.firstChild);
+    }
+}
+
+function applyTheme(biome) {
+    document.body.className = document.body.className.replace(/biome-\w+/g, "").trim();
+    if (biome) {
+        document.body.classList.add(`biome-${biome}`);
+    }
+}
+
+// Exported for use in step 3/4 if needed, but everything is in one file.
+// We are implementing step 2 now.
+// Step 3/4 logic will be added/merged into this structure in next steps or I can do it now since I'm rewriting the file?
+// The plan says "Refactor script.js - Core Logic" for step 2.
+// I will write the Core Logic now. UI/Accessibility specific handlers (About/Create Account) are Step 3.
+// But to keep the file valid, I need to include the basic event listeners or placeholders.
+
+// --- AUDIO & HAPTICS (Step 4) ---
 
 function speakText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 1.0;
-        utterance.pitch = 0.9;
+        utterance.pitch = 1.0;
         window.speechSynthesis.speak(utterance);
     }
 }
 
-/**
- * HAPTIC FEEDBACK (Mod 13)
- * Triggers vibration on mobile devices if supported.
- */
 function triggerHaptic(duration = 200) {
     if (navigator.vibrate) {
         navigator.vibrate(duration);
     }
 }
 
-/**
- * THE ECHO (Mod 11)
- * Replays a ghostly version of the action sound or log after 3 seconds.
- */
-function triggerEcho(text) {
-    setTimeout(() => {
-        // We use TTS as the "Ghostly Sound" for accessibility
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(`Echo... ${text}`);
-            utterance.rate = 0.7; // Slower
-            utterance.pitch = 0.5; // Lower, ghostly
-            utterance.volume = 0.5; // Quieter
-            window.speechSynthesis.speak(utterance);
+// Web Audio API Context
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+
+    if (type === 'attack') {
+        // Low thud/impact
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(150, now);
+        oscillator.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+        gainNode.gain.setValueAtTime(0.5, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        oscillator.start(now);
+        oscillator.stop(now + 0.1);
+    } else if (type === 'miss') {
+        // Whoosh
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(400, now);
+        oscillator.frequency.linearRampToValueAtTime(200, now + 0.2);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.linearRampToValueAtTime(0.01, now + 0.2);
+        oscillator.start(now);
+        oscillator.stop(now + 0.2);
+    } else if (type === 'spell') {
+        // Magic chime
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(800, now);
+        oscillator.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        oscillator.start(now);
+        oscillator.stop(now + 0.5);
+    } else if (type === 'powerup') {
+        // Powerup
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(400, now);
+        oscillator.frequency.linearRampToValueAtTime(600, now + 0.1);
+        oscillator.frequency.linearRampToValueAtTime(800, now + 0.2);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        oscillator.start(now);
+        oscillator.stop(now + 0.4);
+    } else if (type === 'fail') {
+        // Error buzzer
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(200, now);
+        oscillator.frequency.linearRampToValueAtTime(150, now + 0.3);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.linearRampToValueAtTime(0.01, now + 0.3);
+        oscillator.start(now);
+        oscillator.stop(now + 0.3);
+    }
+}
+
+function changeMusic() {
+    // Switch between a few placeholder tracks to simulate different themes
+    // Using free reliable audio sources if available, or toggling between the same one to restart it
+    // Since we only have one source in HTML, we can try to find another or just restart/modify playback rate
+    // to simulate a different "feel" (e.g. slower for cave, faster for battle).
+
+    const music = ui.bgMusic;
+    const sources = [
+        "https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3", // Dark/Ambient
+        "https://cdn.pixabay.com/audio/2021/09/06/audio_3439446c64.mp3", // Ethereal
+        "https://cdn.pixabay.com/audio/2022/01/18/audio_d2166e5b85.mp3"  // Suspense
+    ];
+
+    // Simple deterministic hash of biome name to pick a track
+    const biomeVal = gameState.biome.length;
+    const trackIndex = biomeVal % sources.length;
+
+    music.pause();
+    const sourceEl = music.querySelector('source');
+    if (sourceEl) {
+        sourceEl.src = sources[trackIndex];
+        music.load(); // Reload to apply new source
+        // Only play if it was already playing or user opted in
+        // (checking if it was playing is hard if we just paused it,
+        // but we can check the toggle button state text)
+        if (ui.audioToggle.textContent.includes("Mute")) {
+            music.play().catch(e => console.log("Audio play failed:", e));
         }
-    }, 3000);
-}
-
-// --- RENDER ENGINE ---
-
-function applyTheme(biome) {
-    // Remove all biome classes
-    document.body.className = document.body.className.replace(/biome-\w+/g, "").trim();
-    // Add new biome class
-    if (biome) {
-        document.body.classList.add(`biome-${biome}`);
     }
 }
 
-function updateNarrative(text, type = 'normal', logUpdate = null) {
-    // 1. Visual Update
-    const p = document.createElement('p');
-    p.textContent = text;
-    if (type === 'crit') p.classList.add('crit-success');
-    if (type === 'fail') p.classList.add('crit-fail');
-    ui.storyContainer.appendChild(p);
+// --- INITIALIZATION ---
 
-    requestAnimationFrame(() => {
-        ui.storyContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        // Also scroll the parent container just in case
-        document.getElementById('narrative-panel').scrollTop = document.getElementById('narrative-panel').scrollHeight;
-    });
-
-    // 2. ARIA Update
-    ui.liveRegion.textContent = "";
-    setTimeout(() => {
-        ui.liveRegion.textContent = text;
-    }, 50);
-
-    // 3. TTS
-    speakText(text);
-
-    // 4. Log
-    if (logUpdate) {
-        const li = document.createElement('li');
-        li.textContent = `> ${logUpdate}`;
-        ui.gameLog.insertBefore(li, ui.gameLog.firstChild);
-
-        // Trigger Echo for the action log
-        triggerEcho(logUpdate);
-    }
-}
-
-function renderButtons(options) {
-    ui.actionPanel.innerHTML = ""; // Clear existing
-
-    options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = "action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-charcoal-light transition-all rounded text-left focus:ring-2 focus:ring-gold mb-2";
-
-        btn.innerHTML = `
-            <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">${opt.label}</span>
-            <span class="block text-sm text-gray-400 mt-1">${opt.description}</span>
-        `;
-
-        btn.onclick = () => handleAction(opt.action_type);
-
-        ui.actionPanel.appendChild(btn);
-    });
-}
-
-function updateStats(state) {
-    document.getElementById('hp-display').textContent = `${state.current_hp} / ${state.max_hp}`;
-    const hpPercent = (state.current_hp / state.max_hp) * 100;
-    ui.hpBar.style.width = `${hpPercent}%`;
-    ui.spellSlots.textContent = `${state.spell_slots}/${state.max_spell_slots}`;
-}
-
-// --- API CLIENT ---
-
-async function startGame() {
-    try {
-        ui.storyContainer.innerHTML = "<p class='italic text-gray-500'>Connecting to World Engine...</p>";
-
-        const response = await fetch(`${API_BASE}/start`, { method: "POST" });
-        const data = await response.json();
-
-        handleResponse(data);
-        currentPlayerId = data.player_state.player_id;
-
-    } catch (err) {
-        console.error("Failed to start game:", err);
-        ui.storyContainer.innerHTML += "<p class='text-red-500'>Connection failed. Please ensure the Python server is running.</p>";
-    }
-}
-
-async function handleAction(type) {
-    if (!currentPlayerId) return;
-
-    try {
-        const response = await fetch(`${API_BASE}/action`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ player_id: currentPlayerId, action_type: type })
-        });
-        const data = await response.json();
-        handleResponse(data);
-
-    } catch (err) {
-        console.error("Action failed:", err);
-    }
-}
-
-function handleResponse(data) {
-    // 1. Theme
-    applyTheme(data.biome);
-
-    // 2. Stats
-    updateStats(data.player_state);
-
-    // 3. Narrative
-    // If there is a log update (action result), show that first?
-    // Usually we append the narrative description.
-    let textType = 'normal';
-    if (data.log_update) {
-        if (data.log_update.includes("CRITICAL")) textType = 'crit';
-        if (data.log_update.includes("MISS") || data.log_update.includes("failed")) textType = 'fail';
-        updateNarrative(data.log_update, textType, data.log_update);
-    }
-
-    // Then show the room description
-    // Avoid repeating if it's the exact same? The backend handles "still in battle" logic.
-    setTimeout(() => {
-        updateNarrative(data.description);
-    }, 1000); // Slight delay for pacing
-
-    // 4. Buttons
-    renderButtons(data.options);
-
-    // 5. Haptics
-    if (data.hp_change < 0) {
-        triggerHaptic(500); // Long vibration for damage
-    } else if (data.hp_change > 0) {
-        triggerHaptic(100); // Short pulse for healing
-    }
-}
-
-// --- INIT ---
+window.addEventListener('DOMContentLoaded', startGame);
 
 ui.audioToggle.addEventListener('click', () => {
     if (ui.bgMusic.paused) {
@@ -222,9 +425,55 @@ ui.audioToggle.addEventListener('click', () => {
 });
 
 ui.btnRepeat.addEventListener('click', () => {
-    // Speaks the last added paragraph
     const lastP = ui.storyContainer.querySelector('p:last-child');
     if (lastP) speakText(lastP.textContent);
 });
 
-window.addEventListener('DOMContentLoaded', startGame);
+// --- UI & ACCESSIBILITY HANDLERS (Step 3) ---
+
+ui.btnCreateAccount.addEventListener('click', () => {
+    alert("The spirits of the void prevent account creation at this time.");
+});
+
+ui.btnAbout.addEventListener('click', () => {
+    ui.aboutModal.classList.remove('hidden');
+    ui.aboutModal.setAttribute('aria-hidden', 'false');
+
+    // Trap focus inside modal
+    ui.btnCloseAbout.focus();
+
+    // TTS Reading with Male Voice
+    if ('speechSynthesis' in window) {
+        // Construct the text content from the paragraphs
+        const text = Array.from(ui.aboutContent.querySelectorAll('p'))
+                          .map(p => p.textContent)
+                          .join(" ");
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Attempt to find a male voice
+        const voices = window.speechSynthesis.getVoices();
+        // This is a heuristic; 'Google US English' is often male or generic.
+        // We look for "Male" or specific names, but often default is fine.
+        // Let's try to set pitch lower to simulate male voice if explicit male voice isn't found.
+        const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('David') || v.name.includes('Daniel'));
+        if (maleVoice) utterance.voice = maleVoice;
+
+        utterance.pitch = 0.8; // Lower pitch for male-sounding
+        utterance.rate = 1.0;
+
+        window.speechSynthesis.speak(utterance);
+    }
+});
+
+ui.btnCloseAbout.addEventListener('click', () => {
+    ui.aboutModal.classList.add('hidden');
+    ui.aboutModal.setAttribute('aria-hidden', 'true');
+    window.speechSynthesis.cancel(); // Stop reading
+    ui.btnAbout.focus(); // Return focus
+});
+
+// Load voices when they are ready (Chrome needs this)
+window.speechSynthesis.onvoiceschanged = () => {
+    // Just to ensure getVoices() returns something later
+};

@@ -23,11 +23,19 @@
         The Audio Toggle is placed first in the DOM order to ensure it is the first
         interactive element users encounter when tabbing, allowing immediate control over sound.
     -->
-    <header class="p-4 border-b border-gold/30 bg-charcoal-light flex justify-between items-center z-10">
+    <header class="p-4 border-b border-gold/30 bg-charcoal-light flex flex-wrap gap-4 justify-between items-center z-10">
         <h1 class="text-xl md:text-2xl font-bold text-gold tracking-wider uppercase">The Infinite Horizon</h1>
-        <button id="audio-toggle" class="px-4 py-2 border-2 border-gold text-gold hover:bg-gold hover:text-charcoal transition-colors rounded focus:ring-4 focus:ring-gold/50 outline-none font-bold" aria-label="Toggle Background Music">
-            Start Music 🎵
-        </button>
+        <div class="flex gap-2">
+            <button id="btn-create-account" class="px-4 py-2 border border-gold/50 text-gold hover:bg-gold hover:text-charcoal transition-colors rounded text-sm font-bold">
+                Create Account
+            </button>
+            <button id="btn-about" class="px-4 py-2 border border-gold/50 text-gold hover:bg-gold hover:text-charcoal transition-colors rounded text-sm font-bold">
+                About This Game
+            </button>
+            <button id="audio-toggle" class="px-4 py-2 border-2 border-gold text-gold hover:bg-gold hover:text-charcoal transition-colors rounded focus:ring-4 focus:ring-gold/50 outline-none font-bold" aria-label="Toggle Background Music">
+                Start Music 🎵
+            </button>
+        </div>
     </header>
 
     <!-- Main Game Layout: 3 Columns -->
@@ -96,10 +104,6 @@
             </div>
 
             <!-- Live Region for Screen Readers -->
-            <!-- We keep this visually hidden or part of the visible text.
-                 Since we append text to the story container, we can also have a dedicated region for the *latest* update if we want purely status updates,
-                 but for a text game, reading the new paragraph is usually handled by the append.
-                 However, to ensure strict compliance with the prompt's request for aria-live logic: -->
             <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
             <!-- Floating Controls for Narrative -->
@@ -118,20 +122,7 @@
             <h2 class="text-xl font-bold text-gold border-b border-gold/50 pb-2 mb-4">Actions</h2>
 
             <div class="grid grid-cols-1 gap-4">
-                <button id="btn-attack" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-red-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
-                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">⚔️ Attack</span>
-                    <span class="block text-sm text-gray-400 mt-1">Strike with your Runeblade.</span>
-                </button>
-
-                <button id="btn-investigate" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-blue-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
-                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">🔍 Investigate</span>
-                    <span class="block text-sm text-gray-400 mt-1">Search for traps or loot.</span>
-                </button>
-
-                <button id="btn-spell" class="action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-purple-900/30 transition-all rounded text-left focus:ring-2 focus:ring-gold">
-                    <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">✨ Cast Spell</span>
-                    <span class="block text-sm text-gray-400 mt-1">Unleash arcane energy.</span>
-                </button>
+                <!-- Buttons will be injected here by script.js -->
             </div>
 
             <div class="mt-auto p-4 bg-charcoal border border-gold/10 rounded">
@@ -154,11 +145,33 @@
     </footer>
 
     <!-- Background Audio Element -->
-    <!-- Using a placeholder loop source. In a real app, this would be a local file. -->
     <audio id="bg-music" loop>
         <source src="https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
+
+    <!-- About Modal -->
+    <div id="about-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="bg-charcoal border-2 border-gold p-8 rounded-lg max-w-lg w-full relative shadow-2xl">
+            <button id="btn-close-about" class="absolute top-4 right-4 text-gray-400 hover:text-gold transition-colors" aria-label="Close About Popup">
+                ✕
+            </button>
+            <h2 id="about-title" class="text-2xl font-bold text-gold mb-4">About The Infinite Horizon</h2>
+            <div id="about-content" class="text-parchment space-y-4">
+                <p>
+                    Welcome to The Infinite Horizon, an accessible text-based adventure game.
+                    Explore procedurally generated worlds, battle monsters, and discover secrets.
+                </p>
+                <p>
+                    This game features high contrast visual themes, screen reader support,
+                    and immersive soundscapes.
+                </p>
+                <p>
+                    Use the controls to interact with the world. All actions are keyboard accessible.
+                </p>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
