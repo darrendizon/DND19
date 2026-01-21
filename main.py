@@ -106,13 +106,13 @@ def calculate_difficulty(wins: int) -> float:
     return 1.0 + (wins // 5) * 0.1
 
 def generate_room_content(seed: int, wins: int):
-    random.seed(seed)
+    rng = random.Random(seed)
 
-    biome = random.choice(BIOMES)
-    atmosphere = random.choice(ATMOSPHERES)
+    biome = rng.choice(BIOMES)
+    atmosphere = rng.choice(ATMOSPHERES)
 
     # Select enemy based on biome (Coherency)
-    enemy = random.choice(ENEMIES[biome["id"]])
+    enemy = rng.choice(ENEMIES[biome["id"]])
 
     # Select dialect based on biome seed (consistent for the biome instance)
     dialect_keys = list(DIALECTS.keys())
