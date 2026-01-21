@@ -115,12 +115,17 @@ function updateNarrative(text, type = 'normal', logUpdate = null) {
 function renderButtons(options) {
     ui.actionPanel.innerHTML = ""; // Clear existing
 
-    options.forEach(opt => {
+    options.forEach((opt, index) => {
         const btn = document.createElement('button');
         btn.className = "action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-charcoal-light transition-all rounded text-left focus:ring-2 focus:ring-gold mb-2";
 
+        // Keyboard shortcut hint (1-9)
+        const shortcutHint = index < 9 ? ` <kbd class="text-sm font-normal text-gray-500 ml-2 border border-gray-600 rounded px-1 hidden md:inline-block">[${index + 1}]</kbd>` : '';
+
         btn.innerHTML = `
-            <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">${opt.label}</span>
+            <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">
+                ${opt.label}${shortcutHint}
+            </span>
             <span class="block text-sm text-gray-400 mt-1">${opt.description}</span>
         `;
 
@@ -225,6 +230,26 @@ ui.btnRepeat.addEventListener('click', () => {
     // Speaks the last added paragraph
     const lastP = ui.storyContainer.querySelector('p:last-child');
     if (lastP) speakText(lastP.textContent);
+});
+
+// Keyboard Shortcuts
+document.addEventListener('keydown', (e) => {
+    // Ignore if holding modifiers (except Shift, maybe) to avoid browser conflict
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+    // Check for number keys 1-9
+    const key = parseInt(e.key);
+    if (!isNaN(key) && key > 0 && key <= 9) {
+        const buttons = ui.actionPanel.querySelectorAll('button');
+        const targetBtn = buttons[key - 1];
+
+        if (targetBtn) {
+            e.preventDefault(); // Prevent scrolling if that's a thing
+            targetBtn.focus(); // Good a11y: move focus to what we just activated
+            targetBtn.click();
+            triggerHaptic(50); // Feedback
+        }
+    }
 });
 
 window.addEventListener('DOMContentLoaded', startGame);
