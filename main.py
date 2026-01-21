@@ -94,6 +94,7 @@ DIALECTS = {
     "formal": lambda text: f"Attention. {text} Proceed with caution.",
     "mystic": lambda text: f"The spirits whisper... {text} Fate is watching."
 }
+DIALECT_KEYS = list(DIALECTS.keys())
 
 def get_db():
     return sqlite3.connect(DB_FILE)
@@ -115,8 +116,7 @@ def generate_room_content(seed: int, wins: int):
     enemy = random.choice(ENEMIES[biome["id"]])
 
     # Select dialect based on biome seed (consistent for the biome instance)
-    dialect_keys = list(DIALECTS.keys())
-    dialect_name = dialect_keys[seed % len(dialect_keys)]
+    dialect_name = DIALECT_KEYS[seed % len(DIALECT_KEYS)]
     flavor_func = DIALECTS[dialect_name]
 
     description = f"You stand in {biome['name']}. The air is {atmosphere}. A {enemy} blocks your path."
