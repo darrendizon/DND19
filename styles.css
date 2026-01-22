@@ -77,6 +77,8 @@ body {
 .text-parchment { color: var(--color-text-base); }
 .text-gold { color: var(--color-accent); }
 
+.bg-gold { background-color: var(--color-accent); }
+
 .border-gold { border-color: var(--color-accent); }
 
 /* Scrollbar Customization */
