@@ -52,7 +52,7 @@
             <div class="space-y-4">
                 <div>
                     <p class="text-sm text-gray-400 uppercase tracking-widest">Name</p>
-                    <p class="text-lg font-bold">Kaelen the Void-Walker</p>
+                    <p id="character-name" class="text-lg font-bold">Kaelen the Void-Walker</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-400 uppercase tracking-widest">Class</p>
@@ -169,6 +169,27 @@
                 <p>
                     Use the controls to interact with the world. All actions are keyboard accessible.
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Character Creation Modal -->
+    <div id="char-modal" role="dialog" aria-modal="true" aria-labelledby="char-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md">
+        <div class="bg-charcoal border-2 border-gold p-8 rounded-lg max-w-md w-full relative shadow-2xl text-center">
+            <h2 id="char-title" class="text-3xl font-bold text-gold mb-6 tracking-wide">Create Your Character</h2>
+
+            <div class="mb-6 space-y-2">
+                <label for="char-name-input" class="block text-sm text-gray-400 uppercase tracking-widest">Character Name</label>
+                <input type="text" id="char-name-input" class="w-full bg-charcoal-dark border border-gold/50 text-parchment p-3 rounded text-center text-lg focus:border-gold focus:ring-2 focus:ring-gold/50 outline-none transition-all" placeholder="Enter name...">
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button id="btn-random-char" class="w-full px-6 py-3 border border-gold/30 text-gold hover:bg-gold/10 transition-colors rounded font-bold uppercase tracking-wider text-sm">
+                    🎲 Randomize Name
+                </button>
+                <button id="btn-start-game" class="w-full px-6 py-3 bg-gold text-charcoal hover:bg-white transition-colors rounded font-bold uppercase tracking-wider text-lg shadow-lg hover:shadow-gold/20">
+                    Start Adventure
+                </button>
             </div>
         </div>
     </div>

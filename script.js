@@ -100,7 +100,13 @@ const ui = {
     btnCreateAccount: document.getElementById('btn-create-account'),
     aboutModal: document.getElementById('about-modal'),
     btnCloseAbout: document.getElementById('btn-close-about'),
-    aboutContent: document.getElementById('about-content')
+    aboutContent: document.getElementById('about-content'),
+    // Character Creation UI
+    charModal: document.getElementById('char-modal'),
+    charInput: document.getElementById('char-name-input'),
+    btnRandomChar: document.getElementById('btn-random-char'),
+    btnStartGame: document.getElementById('btn-start-game'),
+    characterName: document.getElementById('character-name')
 };
 
 // --- CORE GAME LOGIC ---
@@ -122,6 +128,54 @@ function startGame() {
     // Attempt to start music if allowed, otherwise waiting for user interaction
     // Browser autoplay policy might block this initially.
 }
+
+// --- CHARACTER CREATION ---
+
+const FANTASY_NAMES = [
+    "Kaelen", "Thorne", "Elara", "Draven", "Seraphina",
+    "Vaelith", "Ragnar", "Lysandra", "Caelum", "Isolde",
+    "Zephyr", "Nyx", "Orion", "Lyra", "Valerius"
+];
+
+const TITLES = [
+    "the Void-Walker", "the Light-Bringer", "of the Iron Will",
+    "the Shadow-Weaver", "the Star-Born", "of the Deep",
+    "the Storm-Caller", "the Silent", "the Unbroken", "the Arcane"
+];
+
+function generateName() {
+    const name = FANTASY_NAMES[Math.floor(Math.random() * FANTASY_NAMES.length)];
+    const title = TITLES[Math.floor(Math.random() * TITLES.length)];
+    return `${name} ${title}`;
+}
+
+ui.btnRandomChar.addEventListener('click', () => {
+    ui.charInput.value = generateName();
+    playSound('investigate'); // Little feedback sound
+});
+
+ui.btnStartGame.addEventListener('click', () => {
+    const name = ui.charInput.value.trim() || generateName();
+    ui.characterName.textContent = name;
+
+    // Hide Modal
+    ui.charModal.classList.add('hidden');
+    ui.charModal.setAttribute('aria-hidden', 'true');
+
+    // Start Game Focus
+    if (ui.actionPanel) {
+        const firstActionBtn = ui.actionPanel.querySelector('button');
+        if (firstActionBtn) firstActionBtn.focus();
+    }
+
+    playSound('powerup');
+});
+
+// Initialize Character Creation
+window.addEventListener('load', () => {
+    ui.charInput.value = generateName();
+    ui.charInput.focus();
+});
 
 function handleAction(type) {
     gameState.turn++;
