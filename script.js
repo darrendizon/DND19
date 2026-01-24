@@ -230,14 +230,18 @@ function generateOptions() {
 
 function renderButtons(options) {
     ui.actionPanel.innerHTML = "";
-    options.forEach(opt => {
+    options.forEach((opt, index) => {
         const btn = document.createElement('button');
+        const key = index + 1;
         btn.className = "action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-charcoal-light transition-all rounded text-left focus:ring-2 focus:ring-gold mb-2";
+        btn.setAttribute('aria-keyshortcuts', key.toString());
         // Remove Emoji for aria-label if desired, but here we keep them in visual text.
         // User asked: "Refrain from using Emoji's in the HTML" for the ABOUT POP-UP.
         // For buttons, emojis are often used as icons. I will keep them here unless requested otherwise for buttons.
         btn.innerHTML = `
-            <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">${opt.label}</span>
+            <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">
+                <span class="text-sm font-mono mr-2 text-gray-500 group-hover:text-gold transition-colors">[${key}]</span>${opt.label}
+            </span>
             <span class="block text-sm text-gray-400 mt-1">${opt.description}</span>
         `;
         btn.onclick = () => handleAction(opt.action_type);
@@ -471,6 +475,21 @@ ui.btnCloseAbout.addEventListener('click', () => {
     ui.aboutModal.setAttribute('aria-hidden', 'true');
     window.speechSynthesis.cancel(); // Stop reading
     ui.btnAbout.focus(); // Return focus
+});
+
+// Global Keyboard Shortcuts (1-9)
+document.addEventListener('keydown', (e) => {
+    // Only trigger if no other interactive element is focused (optional, but good practice usually)
+    // But here we want it to work generally unless typing (which we don't have).
+    // Let's just check for keys 1-9.
+    const key = parseInt(e.key);
+    if (!isNaN(key) && key >= 1 && key <= 9) {
+        const buttons = ui.actionPanel.querySelectorAll('button');
+        if (buttons[key - 1]) {
+            buttons[key - 1].click();
+            buttons[key - 1].focus(); // Maintain focus flow
+        }
+    }
 });
 
 // Load voices when they are ready (Chrome needs this)
