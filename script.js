@@ -230,15 +230,21 @@ function generateOptions() {
 
 function renderButtons(options) {
     ui.actionPanel.innerHTML = "";
-    options.forEach(opt => {
+    options.forEach((opt, index) => {
+        const key = index + 1;
         const btn = document.createElement('button');
         btn.className = "action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-charcoal-light transition-all rounded text-left focus:ring-2 focus:ring-gold mb-2";
+        btn.dataset.key = key.toString();
+
         // Remove Emoji for aria-label if desired, but here we keep them in visual text.
         // User asked: "Refrain from using Emoji's in the HTML" for the ABOUT POP-UP.
         // For buttons, emojis are often used as icons. I will keep them here unless requested otherwise for buttons.
         btn.innerHTML = `
-            <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">${opt.label}</span>
-            <span class="block text-sm text-gray-400 mt-1">${opt.description}</span>
+            <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">
+                <span class="inline-block text-xs border border-gold/30 rounded px-1.5 py-0.5 mr-2 text-gray-500 group-hover:text-gold transition-colors font-mono" aria-hidden="true">[${key}]</span>
+                ${opt.label}
+            </span>
+            <span class="block text-sm text-gray-400 mt-1 pl-8">${opt.description}</span>
         `;
         btn.onclick = () => handleAction(opt.action_type);
         ui.actionPanel.appendChild(btn);
@@ -477,3 +483,19 @@ ui.btnCloseAbout.addEventListener('click', () => {
 window.speechSynthesis.onvoiceschanged = () => {
     // Just to ensure getVoices() returns something later
 };
+
+// --- KEYBOARD SHORTCUTS ---
+
+document.addEventListener('keydown', (e) => {
+    // Ignore if user is typing in an input field (e.g. if we add character name input later)
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+
+    // Check for keys 1-9
+    if (e.key >= '1' && e.key <= '9') {
+        const btn = ui.actionPanel.querySelector(`button[data-key="${e.key}"]`);
+        if (btn) {
+            btn.click();
+            btn.focus();
+        }
+    }
+});
