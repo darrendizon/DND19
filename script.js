@@ -197,8 +197,8 @@ function handleAction(type) {
         resultText += " You have fallen in battle...";
         // Simple respawn logic for now
         setTimeout(() => {
-            alert("You have died. Resurrecting...");
-            startGame();
+            showToast("You have died. Resurrecting...");
+            setTimeout(startGame, 3000);
         }, 2000);
     }
     updateStats();
@@ -292,12 +292,34 @@ function applyTheme(biome) {
     }
 }
 
-// Exported for use in step 3/4 if needed, but everything is in one file.
-// We are implementing step 2 now.
-// Step 3/4 logic will be added/merged into this structure in next steps or I can do it now since I'm rewriting the file?
-// The plan says "Refactor script.js - Core Logic" for step 2.
-// I will write the Core Logic now. UI/Accessibility specific handlers (About/Create Account) are Step 3.
-// But to keep the file valid, I need to include the basic event listeners or placeholders.
+function showToast(message) {
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'fixed top-20 right-4 z-50 flex flex-col gap-2';
+        document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'bg-charcoal border border-gold text-gold px-6 py-4 rounded shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0';
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <span class="text-xl">🔮</span>
+        <p class="font-bold">${message}</p>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.remove('translate-x-full', 'opacity-0');
+    });
+
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-x-full');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
 
 // --- AUDIO & HAPTICS (Step 4) ---
 
@@ -438,7 +460,7 @@ ui.btnRepeat.addEventListener('click', () => {
 // --- UI & ACCESSIBILITY HANDLERS (Step 3) ---
 
 ui.btnCreateAccount.addEventListener('click', () => {
-    alert("The spirits of the void prevent account creation at this time.");
+    showToast("The spirits of the void prevent account creation at this time.");
 });
 
 ui.btnAbout.addEventListener('click', () => {
