@@ -5,3 +5,7 @@
 ## 2024-05-24 - Reusable Toast Notification Pattern
 **Learning:** Native `alert()` dialogs break immersion and block the main thread. Replacing them with non-blocking, accessible toast notifications (using `role="alert"`) provides a seamless "high fantasy" experience without disrupting gameplay flow.
 **Action:** Use the `showToast()` helper function with Tailwind classes for all in-game notifications instead of browser alerts.
+
+## 2024-05-25 - Skip Link Focus Management
+**Learning:** For a "Skip to Content" link to work reliably across all user agents, the target element (e.g., `<main>`) must have `tabindex="-1"` to programmatically receive focus.
+**Action:** When adding skip links, always ensure the target ID exists and has `tabindex="-1"`.
