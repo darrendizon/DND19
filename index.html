@@ -18,6 +18,10 @@
 </head>
 <body class="bg-charcoal text-parchment font-serif h-screen flex flex-col overflow-hidden selection:bg-gold selection:text-charcoal">
 
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-gold focus:text-charcoal focus:font-bold focus:rounded focus:outline-none focus:ring-4 focus:ring-gold/50">
+        Skip to Main Content
+    </a>
+
     <!--
         ACCESSIBILITY NOTE:
         The Audio Toggle is placed first in the DOM order to ensure it is the first
@@ -39,7 +43,7 @@
     </header>
 
     <!-- Main Game Layout: 3 Columns -->
-    <main class="flex-grow grid grid-cols-1 md:grid-cols-12 gap-0 relative min-h-0">
+    <main id="main-content" tabindex="-1" class="flex-grow grid grid-cols-1 md:grid-cols-12 gap-0 relative min-h-0 focus:outline-none">
 
         <!--
             Left Panel: Character Stats
