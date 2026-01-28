@@ -235,6 +235,7 @@ function renderButtons(options) {
         const btn = document.createElement('button');
         btn.className = "action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-charcoal-light transition-all rounded text-left focus:ring-2 focus:ring-gold mb-2";
         btn.dataset.key = key.toString();
+        btn.setAttribute('aria-keyshortcuts', key.toString());
 
         // Remove Emoji for aria-label if desired, but here we keep them in visual text.
         // User asked: "Refrain from using Emoji's in the HTML" for the ABOUT POP-UP.
