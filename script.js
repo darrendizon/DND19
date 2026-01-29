@@ -255,6 +255,8 @@ function updateStats() {
     ui.hpDisplay.textContent = `${gameState.hp} / ${gameState.maxHp}`;
     const hpPercent = (gameState.hp / gameState.maxHp) * 100;
     ui.hpBar.style.width = `${hpPercent}%`;
+    ui.hpBar.parentElement.setAttribute('aria-valuenow', gameState.hp);
+    ui.hpBar.parentElement.setAttribute('aria-valuemax', gameState.maxHp);
     ui.spellSlots.textContent = `${gameState.spellSlots}/${gameState.maxSpellSlots}`;
 }
 

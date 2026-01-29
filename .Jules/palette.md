@@ -5,3 +5,7 @@
 ## 2024-05-24 - Reusable Toast Notification Pattern
 **Learning:** Native `alert()` dialogs break immersion and block the main thread. Replacing them with non-blocking, accessible toast notifications (using `role="alert"`) provides a seamless "high fantasy" experience without disrupting gameplay flow.
 **Action:** Use the `showToast()` helper function with Tailwind classes for all in-game notifications instead of browser alerts.
+
+## 2024-05-25 - Semantic Progress Bars for Vitals
+**Learning:** Visual-only health bars leave screen reader users guessing about critical game state. Using `role="progressbar"` with `aria-valuenow` transforms these elements into semantically rich indicators that AT can interpret as "Health Points: 42%".
+**Action:** Always wrap visual status bars in a container with `role="progressbar"` and keep `aria-valuenow` synchronized via JavaScript.
