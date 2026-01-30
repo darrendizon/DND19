@@ -9,3 +9,7 @@
 ## 2024-05-25 - Semantic Progress Bars for Vitals
 **Learning:** Visual-only health bars leave screen reader users guessing about critical game state. Using `role="progressbar"` with `aria-valuenow` transforms these elements into semantically rich indicators that AT can interpret as "Health Points: 42%".
 **Action:** Always wrap visual status bars in a container with `role="progressbar"` and keep `aria-valuenow` synchronized via JavaScript.
+
+## 2024-05-26 - Accessible Disabled States
+**Learning:** Fully removing disabled buttons from the tab order (using `disabled` attribute) can confuse keyboard users who rely on position memory or want to know why an option is unavailable.
+**Action:** Use `aria-disabled="true"` with visual styling (e.g. `opacity-50`) instead of `disabled` to keep elements focusable, and provide descriptive text explaining the unavailability.

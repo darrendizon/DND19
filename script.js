@@ -220,7 +220,12 @@ function generateOptions() {
     const options = [
         { label: "⚔️ Attack", description: "Strike with your Runeblade.", action_type: "attack" },
         { label: "🔍 Investigate", description: "Search for traps or loot.", action_type: "investigate" },
-        { label: "✨ Cast Spell", description: "Unleash arcane energy.", action_type: "spell" },
+        {
+            label: "✨ Cast Spell",
+            description: gameState.spellSlots > 0 ? "Unleash arcane energy." : "No spell slots remaining.",
+            action_type: "spell",
+            disabled: gameState.spellSlots <= 0
+        },
         { label: "🦶 Travel", description: "Move to a new area.", action_type: "travel" }
     ];
     renderButtons(options);
@@ -235,6 +240,12 @@ function renderButtons(options) {
         const btn = document.createElement('button');
         btn.className = "action-btn group relative w-full p-4 border border-gold/30 bg-charcoal hover:bg-charcoal-light transition-all rounded text-left focus:ring-2 focus:ring-gold mb-2";
         btn.dataset.key = key.toString();
+        btn.setAttribute('aria-keyshortcuts', key.toString());
+
+        if (opt.disabled) {
+            btn.setAttribute('aria-disabled', 'true');
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
 
         // Remove Emoji for aria-label if desired, but here we keep them in visual text.
         // User asked: "Refrain from using Emoji's in the HTML" for the ABOUT POP-UP.
