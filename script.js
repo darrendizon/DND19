@@ -2,6 +2,7 @@
  * Dungeons & Dragons Accessible Adventure Engine (Full-Stack Client)
  *
  * Fully Client-Side Implementation with Local Logic.
+ * Now Vibe Coded with AI-Simulated Randomization.
  */
 
 // --- STATE MANAGEMENT ---
@@ -12,76 +13,115 @@ const gameState = {
     spellSlots: 3,
     maxSpellSlots: 3,
     biome: 'tundra', // Default
+    chaosLevel: 0,   // New: Affects narrative intensity
     turn: 0
 };
 
-// --- DATA: BIOMES & NARRATIVES ---
+// --- DATA: BIOMES & GENERATOR ---
 
 const BIOMES = ['tundra', 'veins', 'clockwork', 'glass', 'archipelago', 'marsh'];
 
-const NARRATIVES = {
-    tundra: {
-        intro: "You stand amidst the frozen wastes. The wind howls like a dying beast.",
-        rooms: [
-            "A frozen lake cracks beneath your feet, revealing dark depths below.",
-            "Icicles hang like daggers from the cliffs, glinting in the pale light.",
-            "Snow drifts pile high against ruined stone structures of a forgotten age.",
-            "The air is so cold it burns your lungs. A shadow moves in the distance."
-        ]
-    },
-    veins: {
-        intro: "You descend into the deep earth, where bioluminescent veins pulse in the walls.",
-        rooms: [
-            "Glowing blue veins thump rhythmically in the rock, lighting your path.",
-            "The tunnel narrows, and the air grows thick with the scent of ozone.",
-            "Crystal formations chime softly as you pass, vibrating with energy.",
-            "A cavern opens up, revealing a vast underground network of glowing roots."
-        ]
-    },
-    clockwork: {
-        intro: "You enter a realm of gears and steam. The ticking of a giant clock fills the air.",
-        rooms: [
-            "Giant brass gears turn slowly in the walls, grinding with the weight of time.",
-            "Steam hisses from copper pipes, obscuring your vision.",
-            "Mechanical spiders scuttle along the ceiling, watching you with glass eyes.",
-            "The floor is a mesh of grating, looking down into an infinite machine."
-        ]
-    },
-    glass: {
-        intro: "You step onto a plain of shattered glass. The sky is a dull, featureless grey.",
-        rooms: [
-            "Shard-towers rise into the grey sky, reflecting nothing.",
-            "The ground crunches beneath your boots. Every step is a risk.",
-            "Mirrors float in the air, showing you reflections of things that aren't there.",
-            "A storm of glass dust approaches, cutting the air."
-        ]
-    },
-    archipelago: {
-        intro: "Islands float in a void of purple nebula. Gravity is a suggestion here.",
-        rooms: [
-            "You leap from one floating rock to another, the void stretching infinitely below.",
-            "Strange, winged creatures glide on the ether currents.",
-            " ancient ruins float by, defying gravity.",
-            "The stars feel close enough to touch in this place."
-        ]
-    },
-    marsh: {
-        intro: "A thick, green fog clings to the swamp. The ground squelches underfoot.",
-        rooms: [
-            "Twisted trees reach out with moss-covered branches.",
-            "Bubbles rise from the murky water, popping with a noxious smell.",
-            "Fireflies dance in the darkness, leading you astray.",
-            "Something large moves in the water nearby."
-        ]
-    }
-};
+class TextGenerator {
+    constructor() {
+        this.vocab = {
+            general: {
+                adjectives: ['ancient', 'crumbling', 'shadowy', 'silent', 'towering', 'ruined', 'echoing', 'misty'],
+                nouns: ['monolith', 'void', 'archway', 'statue', 'altar', 'rift', 'structure', 'remnant'],
+                verbs: ['looms', 'watches', 'fades', 'vibrates', 'crumbles', 'glows', 'pulses', 'waits'],
+                connectors: ['in the distance', 'overhead', 'beneath your feet', 'surrounded by fog', 'bathed in darkness']
+            },
+            chaos: {
+                adjectives: ['glitching', 'neon', 'distorted', 'shimmering', 'corrupted', 'holographic', 'fractured', 'screaming'],
+                nouns: ['signal', 'static', 'geometry', 'code', 'data-stream', 'anomaly', 'polygon', 'noise'],
+                verbs: ['flickers', 'glitches', 'rewrites', 'distorts', 'hums', 'bleeds', 'syncs', 'crashes']
+            },
+            biomes: {
+                tundra: {
+                    adjectives: ['frozen', 'bitter', 'crystalline', 'pale', 'howling', 'numb'],
+                    nouns: ['glacier', 'icicle', 'blizzard', 'tundra', 'frost', 'snowdrift'],
+                    verbs: ['cracks', 'bites', 'shivers', 'freezes', 'howls', 'glints']
+                },
+                veins: {
+                    adjectives: ['bioluminescent', 'pulsing', 'deep', 'subterranean', 'rhythmic', 'thumping'],
+                    nouns: ['vein', 'crystal', 'tunnel', 'cavern', 'root', 'heartbeat'],
+                    verbs: ['throbs', 'pulses', 'glows', 'hums', 'illuminates', 'echoes']
+                },
+                clockwork: {
+                    adjectives: ['brass', 'ticking', 'mechanical', 'steam-filled', 'rusted', 'precise'],
+                    nouns: ['gear', 'piston', 'cog', 'steam', 'clock', 'automaton'],
+                    verbs: ['ticks', 'grinds', 'hisses', 'turns', 'rotates', 'clicks']
+                },
+                glass: {
+                    adjectives: ['shattered', 'reflective', 'sharp', 'mirror-like', 'fragile', 'translucent'],
+                    nouns: ['shard', 'mirror', 'reflection', 'fragment', 'glass', 'prism'],
+                    verbs: ['reflects', 'shines', 'cuts', 'glitters', 'breaks', 'distorts']
+                },
+                archipelago: {
+                    adjectives: ['floating', 'ethereal', 'purple', 'weightless', 'star-filled', 'drifting'],
+                    nouns: ['island', 'nebula', 'void', 'ruin', 'current', 'star'],
+                    verbs: ['floats', 'drifts', 'soars', 'defies', 'shines', 'suspends']
+                },
+                marsh: {
+                    adjectives: ['noxious', 'murky', 'twisted', 'green', 'bubbling', 'thick'],
+                    nouns: ['swamp', 'fog', 'tree', 'bubble', 'firefly', 'mire'],
+                    verbs: ['squelches', 'pops', 'clings', 'oozes', 'rises', 'decays']
+                }
+            }
+        };
 
-const ENCOUNTERS = [
-    { name: "Shadow Wolf", hp: 10, damage: 4 },
-    { name: "Crystal Golem", hp: 15, damage: 3 },
-    { name: "Clockwork Soldier", hp: 12, damage: 5 },
-    { name: "Void Wisp", hp: 8, damage: 6 }
-];
+        this.templates = [
+            "A {adj} {noun} {verb} {conn}.",
+            "You see a {noun}, {adj} and {adj}, {verb}ing {conn}.",
+            "{conn}, a {adj} {noun} {verb}.",
+            "The air is {adj}. A {noun} {verb} nearby.",
+            "You are near a {noun}. It {verb} with a {adj} energy."
+        ];
+    }
+
+    _pick(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    _getWord(type, biome, chaosLevel) {
+        // Chance to pick a chaos word increases with chaosLevel (0-100)
+        const isChaos = Math.random() * 100 < chaosLevel;
+        let pool = [];
+
+        if (isChaos) {
+            pool = this.vocab.chaos[type];
+        } else {
+            // Mix general and biome specific
+            const biomeWords = this.vocab.biomes[biome] ? this.vocab.biomes[biome][type] : [];
+            const generalWords = this.vocab.general[type];
+            pool = [...biomeWords, ...generalWords, ...biomeWords]; // Weight biome words heavily
+        }
+        return this._pick(pool);
+    }
+
+    generate(biome, chaosLevel) {
+        let template = this._pick(this.templates);
+
+        // Replace placeholders
+        return template.replace(/{(\w+)}/g, (match, p1) => {
+            if (p1 === 'conn') return this._pick(this.vocab.general.connectors);
+            return this._getWord(p1 + 's', biome, chaosLevel); // p1 is adj, noun, verb -> pluralize for key
+        });
+    }
+
+    generateIntro(biome) {
+        const intros = {
+            tundra: "You stand amidst the frozen wastes. The wind howls like a dying beast.",
+            veins: "You descend into the deep earth, where bioluminescent veins pulse in the walls.",
+            clockwork: "You enter a realm of gears and steam. The ticking of a giant clock fills the air.",
+            glass: "You step onto a plain of shattered glass. The sky is a dull, featureless grey.",
+            archipelago: "Islands float in a void of purple nebula. Gravity is a suggestion here.",
+            marsh: "A thick, green fog clings to the swamp. The ground squelches underfoot."
+        };
+        return intros[biome] || "You find yourself in an unknown land.";
+    }
+}
+
+const generator = new TextGenerator();
 
 // --- DOM ELEMENTS ---
 
@@ -100,27 +140,43 @@ const ui = {
     btnCreateAccount: document.getElementById('btn-create-account'),
     aboutModal: document.getElementById('about-modal'),
     btnCloseAbout: document.getElementById('btn-close-about'),
-    aboutContent: document.getElementById('about-content')
+    aboutContent: document.getElementById('about-content'),
+    // Help Elements
+    btnHelp: document.getElementById('btn-help'),
+    helpModal: document.getElementById('help-modal'),
+    btnCloseHelp: document.getElementById('btn-close-help'),
+    // Settings Elements
+    btnSettings: document.getElementById('btn-settings'),
+    settingsModal: document.getElementById('settings-modal'),
+    btnCloseSettings: document.getElementById('btn-close-settings'),
+    settingContrast: document.getElementById('setting-contrast'),
+    settingTextColor: document.getElementById('setting-text-color'),
+    settingFont: document.getElementById('setting-font'),
+    settingTextSize: document.getElementById('setting-text-size'),
+    settingLineHeight: document.getElementById('setting-line-height'),
+    settingReducedMotion: document.getElementById('setting-reduced-motion'),
+    settingTtsSpeed: document.getElementById('setting-tts-speed')
 };
 
 // --- CORE GAME LOGIC ---
 
 function startGame() {
+    // Load Settings
+    loadSettings();
+
     gameState.hp = gameState.maxHp;
     gameState.spellSlots = gameState.maxSpellSlots;
     gameState.biome = BIOMES[Math.floor(Math.random() * BIOMES.length)];
+    gameState.chaosLevel = 0;
     gameState.turn = 0;
 
     // Initial Render
     applyTheme(gameState.biome);
     updateStats();
 
-    const narrative = NARRATIVES[gameState.biome].intro;
+    const narrative = generator.generateIntro(gameState.biome);
     updateNarrative(narrative);
     generateOptions();
-
-    // Attempt to start music if allowed, otherwise waiting for user interaction
-    // Browser autoplay policy might block this initially.
 }
 
 function handleAction(type) {
@@ -128,6 +184,9 @@ function handleAction(type) {
     let resultText = "";
     let logText = "";
     let hpChange = 0;
+
+    // Increase chaos slightly every turn
+    gameState.chaosLevel = Math.min(100, gameState.chaosLevel + 2);
 
     // 1. Process Action
     if (type === 'attack') {
@@ -137,10 +196,13 @@ function handleAction(type) {
             resultText = `You strike with your blade, dealing ${dmg} damage!`;
             logText = `Attack: Hit for ${dmg} dmg.`;
             playSound('attack');
+            // Reducing chaos on successful combat
+            gameState.chaosLevel = Math.max(0, gameState.chaosLevel - 5);
         } else {
             resultText = "You swing your weapon, but the enemy dodges!";
             logText = "Attack: Miss.";
             playSound('miss');
+            gameState.chaosLevel += 5; // Frustration increases chaos
         }
     } else if (type === 'investigate') {
         const found = Math.random() > 0.5;
@@ -160,6 +222,7 @@ function handleAction(type) {
             resultText = `You unleash a bolt of arcane energy! It crackles with power, dealing ${dmg} damage.`;
             logText = `Spell: Cast for ${dmg} dmg.`;
             playSound('spell');
+            gameState.chaosLevel += 10; // Magic is chaotic
         } else {
             resultText = "You are out of spell slots! The spell fizzles.";
             logText = "Spell: Fizzled (No slots).";
@@ -175,6 +238,9 @@ function handleAction(type) {
         gameState.biome = BIOMES[nextIdx];
         resultText = "You travel to a new region...";
         logText = `Travel: Moved to ${gameState.biome}.`;
+
+        // Travel resets chaos a bit
+        gameState.chaosLevel = Math.max(0, gameState.chaosLevel - 20);
 
         applyTheme(gameState.biome);
         changeMusic();
@@ -204,13 +270,18 @@ function handleAction(type) {
     updateStats();
 
     // 4. Update Narrative
-    // Combine action result with a new random room description
-    const roomDesc = NARRATIVES[gameState.biome].rooms[Math.floor(Math.random() * NARRATIVES[gameState.biome].rooms.length)];
+    // Combine action result with a new AI-generated room description
+    const roomDesc = generator.generate(gameState.biome, gameState.chaosLevel);
     const fullText = `${resultText} ${roomDesc}`;
 
     let textType = 'normal';
     if (logText.includes('Hit') || logText.includes('Found')) textType = 'crit'; // Positive
     if (logText.includes('Miss') || logText.includes('Fizzled') || logText.includes('Took')) textType = 'fail'; // Negative/Mixed
+
+    // Apply glitch effect if chaos is high
+    if (gameState.chaosLevel > 50 && Math.random() > 0.7) {
+        textType = 'glitch';
+    }
 
     updateNarrative(fullText, textType, logText);
     generateOptions();
@@ -247,9 +318,6 @@ function renderButtons(options) {
             btn.classList.add('opacity-50', 'cursor-not-allowed');
         }
 
-        // Remove Emoji for aria-label if desired, but here we keep them in visual text.
-        // User asked: "Refrain from using Emoji's in the HTML" for the ABOUT POP-UP.
-        // For buttons, emojis are often used as icons. I will keep them here unless requested otherwise for buttons.
         btn.innerHTML = `
             <span class="block text-lg font-bold text-gold group-hover:translate-x-1 transition-transform">
                 <span class="inline-block text-xs border border-gold/30 rounded px-1.5 py-0.5 mr-2 text-gray-500 group-hover:text-gold transition-colors font-mono" aria-hidden="true">[${key}]</span>
@@ -276,6 +344,7 @@ function updateNarrative(text, type = 'normal', logUpdate = null) {
     p.textContent = text;
     if (type === 'crit') p.classList.add('crit-success');
     if (type === 'fail') p.classList.add('crit-fail');
+    if (type === 'glitch') p.classList.add('text-glitch'); // New Vibe style
 
     ui.storyContainer.appendChild(p);
 
@@ -299,10 +368,15 @@ function updateNarrative(text, type = 'normal', logUpdate = null) {
 }
 
 function applyTheme(biome) {
+    // Retain high contrast mode if active
+    const isHighContrast = document.body.classList.contains('high-contrast');
+
     document.body.className = document.body.className.replace(/biome-\w+/g, "").trim();
     if (biome) {
         document.body.classList.add(`biome-${biome}`);
     }
+
+    if (isHighContrast) document.body.classList.add('high-contrast');
 }
 
 function showToast(message) {
@@ -334,13 +408,85 @@ function showToast(message) {
     }, 4000);
 }
 
-// --- AUDIO & HAPTICS (Step 4) ---
+// --- SETTINGS MANAGEMENT ---
+
+function loadSettings() {
+    const contrast = localStorage.getItem('setting-contrast') || 'normal';
+    const textColor = localStorage.getItem('setting-text-color') || 'default';
+    const font = localStorage.getItem('setting-font') || 'serif';
+    const textSize = localStorage.getItem('setting-text-size') || '18px';
+    const lineHeight = localStorage.getItem('setting-line-height') || '1.6';
+    const reducedMotion = localStorage.getItem('setting-reduced-motion') === 'true';
+    const ttsSpeed = localStorage.getItem('setting-tts-speed') || '1.0';
+
+    // Update UI controls
+    if (ui.settingContrast) ui.settingContrast.value = contrast;
+    if (ui.settingTextColor) ui.settingTextColor.value = textColor;
+    if (ui.settingFont) ui.settingFont.value = font;
+    if (ui.settingTextSize) ui.settingTextSize.value = textSize;
+    if (ui.settingLineHeight) ui.settingLineHeight.value = lineHeight;
+    if (ui.settingReducedMotion) ui.settingReducedMotion.checked = reducedMotion;
+    if (ui.settingTtsSpeed) ui.settingTtsSpeed.value = ttsSpeed;
+
+    applySettings(contrast, textColor, font, textSize, lineHeight, reducedMotion);
+}
+
+function applySettings(contrast, textColor, font, textSize, lineHeight, reducedMotion) {
+    const root = document.documentElement;
+
+    // 1. Contrast
+    if (contrast === 'high') {
+        document.body.classList.add('high-contrast');
+    } else {
+        document.body.classList.remove('high-contrast');
+    }
+
+    // 2. Text Color
+    const colorMap = {
+        'default': '#e3dcd2',
+        'white': '#ffffff',
+        'yellow': '#facc15', // Yellow-400
+        'green': '#4ade80',  // Green-400
+        'cyan': '#22d3ee'    // Cyan-400
+    };
+    if (colorMap[textColor]) {
+        root.style.setProperty('--color-text-base', colorMap[textColor]);
+    }
+
+    // 3. Font
+    const fontMap = {
+        'serif': "'Merriweather', 'Georgia', serif",
+        'sans': "'ui-sans-serif', 'system-ui', 'sans-serif'",
+        'atkinson': "'Atkinson Hyperlegible', sans-serif",
+        'mono': "'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace",
+        'dyslexic': "'OpenDyslexic', 'Comic Sans MS', 'Verdana', sans-serif"
+    };
+    if (fontMap[font]) {
+        root.style.setProperty('--font-main', fontMap[font]);
+    }
+
+    // 4. Text Size & Line Height
+    root.style.setProperty('--font-size', textSize);
+    root.style.setProperty('--line-height', lineHeight);
+
+    // 5. Reduced Motion
+    if (reducedMotion) {
+        document.body.classList.add('reduce-motion');
+    } else {
+        document.body.classList.remove('reduce-motion');
+    }
+}
+
+// --- AUDIO & HAPTICS ---
 
 function speakText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.0;
+
+        // Use stored TTS rate or default to 1.0
+        const rate = parseFloat(localStorage.getItem('setting-tts-speed')) || 1.0;
+        utterance.rate = rate;
         utterance.pitch = 1.0;
         window.speechSynthesis.speak(utterance);
     }
@@ -418,11 +564,6 @@ function playSound(type) {
 }
 
 function changeMusic() {
-    // Switch between a few placeholder tracks to simulate different themes
-    // Using free reliable audio sources if available, or toggling between the same one to restart it
-    // Since we only have one source in HTML, we can try to find another or just restart/modify playback rate
-    // to simulate a different "feel" (e.g. slower for cave, faster for battle).
-
     const music = ui.bgMusic;
     const sources = [
         "https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3", // Dark/Ambient
@@ -430,7 +571,6 @@ function changeMusic() {
         "https://cdn.pixabay.com/audio/2022/01/18/audio_d2166e5b85.mp3"  // Suspense
     ];
 
-    // Simple deterministic hash of biome name to pick a track
     const biomeVal = gameState.biome.length;
     const trackIndex = biomeVal % sources.length;
 
@@ -438,10 +578,7 @@ function changeMusic() {
     const sourceEl = music.querySelector('source');
     if (sourceEl) {
         sourceEl.src = sources[trackIndex];
-        music.load(); // Reload to apply new source
-        // Only play if it was already playing or user opted in
-        // (checking if it was playing is hard if we just paused it,
-        // but we can check the toggle button state text)
+        music.load();
         if (ui.audioToggle.textContent.includes("Mute")) {
             music.play().catch(e => console.log("Audio play failed:", e));
         }
@@ -479,30 +616,20 @@ ui.btnCreateAccount.addEventListener('click', () => {
 ui.btnAbout.addEventListener('click', () => {
     ui.aboutModal.classList.remove('hidden');
     ui.aboutModal.setAttribute('aria-hidden', 'false');
-
-    // Trap focus inside modal
     ui.btnCloseAbout.focus();
 
-    // TTS Reading with Male Voice
     if ('speechSynthesis' in window) {
-        // Construct the text content from the paragraphs
         const text = Array.from(ui.aboutContent.querySelectorAll('p'))
                           .map(p => p.textContent)
                           .join(" ");
 
         const utterance = new SpeechSynthesisUtterance(text);
-
-        // Attempt to find a male voice
         const voices = window.speechSynthesis.getVoices();
-        // This is a heuristic; 'Google US English' is often male or generic.
-        // We look for "Male" or specific names, but often default is fine.
-        // Let's try to set pitch lower to simulate male voice if explicit male voice isn't found.
         const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('David') || v.name.includes('Daniel'));
         if (maleVoice) utterance.voice = maleVoice;
 
-        utterance.pitch = 0.8; // Lower pitch for male-sounding
+        utterance.pitch = 0.8;
         utterance.rate = 1.0;
-
         window.speechSynthesis.speak(utterance);
     }
 });
@@ -510,22 +637,107 @@ ui.btnAbout.addEventListener('click', () => {
 ui.btnCloseAbout.addEventListener('click', () => {
     ui.aboutModal.classList.add('hidden');
     ui.aboutModal.setAttribute('aria-hidden', 'true');
-    window.speechSynthesis.cancel(); // Stop reading
-    ui.btnAbout.focus(); // Return focus
+    window.speechSynthesis.cancel();
+    ui.btnAbout.focus();
 });
+
+// Help Handlers
+ui.btnHelp.addEventListener('click', () => {
+    ui.helpModal.classList.remove('hidden');
+    ui.helpModal.setAttribute('aria-hidden', 'false');
+    ui.btnCloseHelp.focus();
+});
+
+ui.btnCloseHelp.addEventListener('click', () => {
+    ui.helpModal.classList.add('hidden');
+    ui.helpModal.setAttribute('aria-hidden', 'true');
+    ui.btnHelp.focus();
+});
+
+// Settings Handlers
+ui.btnSettings.addEventListener('click', () => {
+    ui.settingsModal.classList.remove('hidden');
+    ui.settingsModal.setAttribute('aria-hidden', 'false');
+    ui.btnCloseSettings.focus();
+});
+
+ui.btnCloseSettings.addEventListener('click', () => {
+    ui.settingsModal.classList.add('hidden');
+    ui.settingsModal.setAttribute('aria-hidden', 'true');
+    ui.btnSettings.focus();
+});
+
+// Settings Change Listeners
+const updateSettings = () => {
+    const contrast = ui.settingContrast.value;
+    const textColor = ui.settingTextColor.value;
+    const font = ui.settingFont.value;
+    const textSize = ui.settingTextSize.value;
+    const lineHeight = ui.settingLineHeight.value;
+    const reducedMotion = ui.settingReducedMotion.checked;
+    const ttsSpeed = ui.settingTtsSpeed.value;
+
+    localStorage.setItem('setting-contrast', contrast);
+    localStorage.setItem('setting-text-color', textColor);
+    localStorage.setItem('setting-font', font);
+    localStorage.setItem('setting-text-size', textSize);
+    localStorage.setItem('setting-line-height', lineHeight);
+    localStorage.setItem('setting-reduced-motion', reducedMotion);
+    localStorage.setItem('setting-tts-speed', ttsSpeed);
+
+    applySettings(contrast, textColor, font, textSize, lineHeight, reducedMotion);
+};
+
+ui.settingContrast.addEventListener('change', updateSettings);
+ui.settingTextColor.addEventListener('change', updateSettings);
+ui.settingFont.addEventListener('change', updateSettings);
+ui.settingTextSize.addEventListener('change', updateSettings);
+ui.settingLineHeight.addEventListener('change', updateSettings);
+ui.settingReducedMotion.addEventListener('change', updateSettings);
+ui.settingTtsSpeed.addEventListener('input', updateSettings);
+
 
 // Load voices when they are ready (Chrome needs this)
 window.speechSynthesis.onvoiceschanged = () => {
     // Just to ensure getVoices() returns something later
 };
 
-// --- KEYBOARD SHORTCUTS ---
+// --- KEYBOARD SHORTCUTS & FOCUS MANAGEMENT ---
+
+function trapFocus(e, modal) {
+    if (e.key === 'Tab') {
+        const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+                e.preventDefault();
+                lastElement.focus();
+            }
+        } else {
+            if (document.activeElement === lastElement) {
+                e.preventDefault();
+                firstElement.focus();
+            }
+        }
+    } else if (e.key === 'Escape') {
+        // Close current modal
+        if (!ui.aboutModal.classList.contains('hidden')) ui.btnCloseAbout.click();
+        if (!ui.helpModal.classList.contains('hidden')) ui.btnCloseHelp.click();
+        if (!ui.settingsModal.classList.contains('hidden')) ui.btnCloseSettings.click();
+    }
+}
 
 document.addEventListener('keydown', (e) => {
-    // Ignore if user is typing in an input field (e.g. if we add character name input later)
+    // Modal Trap
+    if (!ui.aboutModal.classList.contains('hidden')) return trapFocus(e, ui.aboutModal);
+    if (!ui.helpModal.classList.contains('hidden')) return trapFocus(e, ui.helpModal);
+    if (!ui.settingsModal.classList.contains('hidden')) return trapFocus(e, ui.settingsModal);
+
+    // Global Shortcuts (ignore if typing in inputs)
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-    // Check for keys 1-9
     if (e.key >= '1' && e.key <= '9') {
         const btn = ui.actionPanel.querySelector(`button[data-key="${e.key}"]`);
         if (btn) {
