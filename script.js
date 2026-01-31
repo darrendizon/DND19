@@ -234,6 +234,13 @@ function generateOptions() {
 // --- RENDERING & UI HELPER FUNCTIONS ---
 
 function renderButtons(options) {
+    // Capture current focus to restore it after re-render
+    const activeBtn = document.activeElement;
+    let focusKey = null;
+    if (activeBtn && activeBtn.classList.contains('action-btn')) {
+        focusKey = activeBtn.dataset.key;
+    }
+
     ui.actionPanel.innerHTML = "";
     options.forEach((opt, index) => {
         const key = index + 1;
@@ -260,6 +267,14 @@ function renderButtons(options) {
         btn.onclick = () => handleAction(opt.action_type);
         ui.actionPanel.appendChild(btn);
     });
+
+    // Restore focus if it was on a button
+    if (focusKey) {
+        const btnToFocus = ui.actionPanel.querySelector(`button[data-key="${focusKey}"]`);
+        if (btnToFocus) {
+            btnToFocus.focus();
+        }
+    }
 }
 
 function updateStats() {
@@ -529,8 +544,8 @@ document.addEventListener('keydown', (e) => {
     if (e.key >= '1' && e.key <= '9') {
         const btn = ui.actionPanel.querySelector(`button[data-key="${e.key}"]`);
         if (btn) {
-            btn.click();
             btn.focus();
+            btn.click();
         }
     }
 });
