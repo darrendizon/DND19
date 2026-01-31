@@ -13,3 +13,7 @@
 ## 2024-05-26 - Accessible Disabled States
 **Learning:** Fully removing disabled buttons from the tab order (using `disabled` attribute) can confuse keyboard users who rely on position memory or want to know why an option is unavailable.
 **Action:** Use `aria-disabled="true"` with visual styling (e.g. `opacity-50`) instead of `disabled` to keep elements focusable, and provide descriptive text explaining the unavailability.
+
+## 2024-05-27 - Preserving Focus Across Dynamic Updates
+**Learning:** Re-rendering interactive lists (like action buttons) destroys the focused element, resetting focus to `body` and disrupting keyboard navigation flow.
+**Action:** Before clearing a container, capture the `data-key` (or ID) of the `activeElement`. After re-rendering, locate the new corresponding element and call `.focus()` to restore context.
