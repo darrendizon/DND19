@@ -63,9 +63,9 @@ body {
     background-color: var(--color-bg-base);
     color: var(--color-text-base);
     font-family: var(--font-main);
-    font-size: 18px; /* Minimum size requirement */
-    line-height: 1.6;
-    transition: background-color 1s ease, color 0.5s ease; /* Smooth Palette Shift */
+    font-size: var(--font-size, 18px);
+    line-height: var(--line-height, 1.6);
+    transition: background-color 2s ease, color 1s ease; /* Smooth Palette Shift - slower for vibe */
 }
 
 /* Custom Utility Classes for Colors (Using Variables) */
@@ -159,4 +159,110 @@ body {
     #stats-heading, #action-panel h2 {
         font-size: 1rem;
     }
+}
+
+/* --- VIBE & CHAOS STYLES --- */
+
+/* Scanline Overlay */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 6px 100%;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.text-glitch {
+    color: #f472b6; /* Pink-400 */
+    text-shadow: 2px 0 #7e22ce, -2px 0 #0ea5e9;
+    animation: glitch 0.5s infinite alternate-reverse;
+    font-family: 'Courier New', Courier, monospace; /* Monospace for code/glitch feel */
+}
+
+@keyframes glitch {
+    0% { transform: skew(0deg); clip-path: inset(10% 0 80% 0); }
+    20% { transform: skew(-5deg); clip-path: inset(60% 0 10% 0); }
+    40% { transform: skew(5deg); clip-path: inset(20% 0 50% 0); }
+    60% { transform: skew(-2deg); clip-path: inset(80% 0 5% 0); }
+    80% { transform: skew(2deg); clip-path: inset(5% 0 60% 0); }
+    100% { transform: skew(0deg); clip-path: inset(30% 0 30% 0); }
+}
+
+.neon-glow {
+    text-shadow: 0 0 5px var(--color-accent), 0 0 10px var(--color-accent), 0 0 20px var(--color-accent);
+}
+
+/* Modal Polish */
+[role="dialog"] > div {
+    border-width: 2px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px var(--color-accent-glow);
+    background-color: var(--color-bg-base);
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(0,0,0,0.2));
+}
+
+/* Button Polish */
+.action-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+}
+
+.action-btn:hover::before {
+    left: 100%;
+}
+
+/* --- SETTINGS MODE STYLES --- */
+
+/* Reduced Motion Mode */
+body.reduce-motion * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
+
+body.reduce-motion .text-glitch {
+    text-shadow: none !important;
+    color: #d8b4fe; /* Static fallback color */
+}
+
+body.reduce-motion::after {
+    display: none; /* Hide scanlines */
+}
+
+body.reduce-motion .action-btn::before {
+    display: none; /* Hide hover shimmer */
+}
+
+/* High Contrast Mode */
+body.high-contrast {
+    --color-bg-base: #000000 !important;
+    --color-text-base: #ffffff !important;
+    --color-accent: #ffff00 !important; /* Yellow */
+    --color-accent-dim: #ffffff !important;
+    --color-accent-glow: none !important;
+}
+
+body.high-contrast::after {
+    display: none; /* Ensure scanlines are gone in HC */
+}
+
+body.high-contrast .action-btn {
+    border-color: #ffffff;
+    background-color: #000000;
+}
+
+body.high-contrast .action-btn:hover,
+body.high-contrast .action-btn:focus {
+    background-color: #333333;
+    border-color: #ffff00;
 }

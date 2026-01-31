@@ -11,15 +11,18 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
 
-    <!-- Google Fonts: Merriweather for that fantasy book feel -->
+    <!-- Google Fonts: Merriweather and Atkinson Hyperlegible -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-charcoal text-parchment font-serif h-screen flex flex-col overflow-hidden selection:bg-gold selection:text-charcoal">
 
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-gold focus:text-charcoal focus:font-bold focus:rounded focus:outline-none focus:ring-4 focus:ring-gold/50">
         Skip to Main Content
+    </a>
+    <a href="#game-log-list" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-48 focus:z-50 focus:px-4 focus:py-2 focus:bg-gold focus:text-charcoal focus:font-bold focus:rounded focus:outline-none focus:ring-4 focus:ring-gold/50">
+        Skip to Game Log
     </a>
 
     <!--
@@ -35,6 +38,12 @@
             </button>
             <button id="btn-about" class="px-4 py-2 border border-gold/50 text-gold hover:bg-gold hover:text-charcoal transition-colors rounded text-sm font-bold">
                 About This Game
+            </button>
+            <button id="btn-settings" class="px-4 py-2 border border-gold/50 text-gold hover:bg-gold hover:text-charcoal transition-colors rounded text-sm font-bold">
+                Settings ⚙️
+            </button>
+            <button id="btn-help" class="px-4 py-2 border border-gold/50 text-gold hover:bg-gold hover:text-charcoal transition-colors rounded text-sm font-bold" aria-label="Keyboard Controls Help">
+                Help ⌨️
             </button>
             <button id="audio-toggle" class="px-4 py-2 border-2 border-gold text-gold hover:bg-gold hover:text-charcoal transition-colors rounded focus:ring-4 focus:ring-gold/50 outline-none font-bold" aria-label="Toggle Background Music">
                 Start Music 🎵
@@ -142,8 +151,8 @@
     <footer class="p-4 border-t border-gold/30 bg-charcoal-light text-center text-sm text-gray-400 z-10">
         <p>
             &copy; 2019-2026 by Darren Dizon under the direction of the California School for the Blind.
-            <a href="https://csb-cde.ca.gov/about/events/dayofcode.aspx" target="_blank" rel="noopener noreferrer" class="text-gold hover:underline font-bold ml-1">
-                Day of Code website <span class="sr-only">(Opens in new tab)</span>
+            <a href="https://www.csb-cde.ca.gov/about/events/nationalcodingsymposium.aspx" target="_blank" rel="noopener noreferrer" class="text-gold hover:underline font-bold ml-1">
+                California school for the blind coding symposium page <span class="sr-only">(Opens in new tab)</span>
             </a>
         </p>
     </footer>
@@ -173,6 +182,117 @@
                 <p>
                     Use the controls to interact with the world. All actions are keyboard accessible.
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="bg-charcoal border-2 border-gold p-8 rounded-lg max-w-md w-full relative shadow-2xl">
+            <button id="btn-close-help" class="absolute top-4 right-4 text-gray-400 hover:text-gold transition-colors" aria-label="Close Help Popup">
+                ✕
+            </button>
+            <h2 id="help-title" class="text-2xl font-bold text-gold mb-6">Keyboard Controls</h2>
+
+            <div class="space-y-4 text-parchment">
+                <div class="flex justify-between border-b border-gold/20 pb-2">
+                    <span>Action Keys</span>
+                    <span class="font-mono text-gold">[1] - [9]</span>
+                </div>
+                <div class="flex justify-between border-b border-gold/20 pb-2">
+                    <span>Navigation</span>
+                    <span class="font-mono text-gold">Tab / Shift+Tab</span>
+                </div>
+                <div class="flex justify-between border-b border-gold/20 pb-2">
+                    <span>Activate</span>
+                    <span class="font-mono text-gold">Space / Enter</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Close Modals</span>
+                    <span class="font-mono text-gold">Esc</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="bg-charcoal border-2 border-gold p-8 rounded-lg max-w-md w-full relative shadow-2xl">
+            <button id="btn-close-settings" class="absolute top-4 right-4 text-gray-400 hover:text-gold transition-colors" aria-label="Close Settings Popup">
+                ✕
+            </button>
+            <h2 id="settings-title" class="text-2xl font-bold text-gold mb-6">Game Settings</h2>
+
+            <div class="space-y-6">
+                <!-- Contrast -->
+                <div>
+                    <label for="setting-contrast" class="block text-gold font-bold mb-2">Contrast Mode</label>
+                    <select id="setting-contrast" class="w-full bg-charcoal-dark border border-gold/50 text-parchment p-2 rounded focus:ring-2 focus:ring-gold outline-none">
+                        <option value="normal">Normal</option>
+                        <option value="high">High Contrast</option>
+                    </select>
+                </div>
+
+                <!-- Text Color -->
+                <div>
+                    <label for="setting-text-color" class="block text-gold font-bold mb-2">Text Color</label>
+                    <select id="setting-text-color" class="w-full bg-charcoal-dark border border-gold/50 text-parchment p-2 rounded focus:ring-2 focus:ring-gold outline-none">
+                        <option value="default">Parchment (Default)</option>
+                        <option value="white">White</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="green">Terminal Green</option>
+                        <option value="cyan">Cyan</option>
+                    </select>
+                </div>
+
+                <!-- Font -->
+                <div>
+                    <label for="setting-font" class="block text-gold font-bold mb-2">Font Style</label>
+                    <select id="setting-font" class="w-full bg-charcoal-dark border border-gold/50 text-parchment p-2 rounded focus:ring-2 focus:ring-gold outline-none">
+                        <option value="serif">Serif (Default)</option>
+                        <option value="sans">Sans-Serif</option>
+                        <option value="atkinson">Atkinson Hyperlegible</option>
+                        <option value="mono">Monospace</option>
+                        <option value="dyslexic">Dyslexic Friendly</option>
+                    </select>
+                </div>
+
+                <!-- Text Size -->
+                <div>
+                    <label for="setting-text-size" class="block text-gold font-bold mb-2">Text Size</label>
+                    <select id="setting-text-size" class="w-full bg-charcoal-dark border border-gold/50 text-parchment p-2 rounded focus:ring-2 focus:ring-gold outline-none">
+                        <option value="18px">Normal (18px)</option>
+                        <option value="20px">Medium (20px)</option>
+                        <option value="24px">Large (24px)</option>
+                        <option value="28px">Extra Large (28px)</option>
+                    </select>
+                </div>
+
+                <!-- Line Height -->
+                <div>
+                    <label for="setting-line-height" class="block text-gold font-bold mb-2">Line Spacing</label>
+                    <select id="setting-line-height" class="w-full bg-charcoal-dark border border-gold/50 text-parchment p-2 rounded focus:ring-2 focus:ring-gold outline-none">
+                        <option value="1.6">Normal (1.6)</option>
+                        <option value="1.8">Relaxed (1.8)</option>
+                        <option value="2.0">Loose (2.0)</option>
+                    </select>
+                </div>
+
+                <!-- Reduced Motion -->
+                <div class="flex items-center gap-2 mt-4">
+                    <input type="checkbox" id="setting-reduced-motion" class="w-5 h-5 accent-gold cursor-pointer">
+                    <label for="setting-reduced-motion" class="text-gold font-bold cursor-pointer">Reduce Motion & Animations</label>
+                </div>
+
+                <!-- TTS Speed -->
+                <div class="mt-4">
+                     <label for="setting-tts-speed" class="block text-gold font-bold mb-2">Narrator Speed (TTS)</label>
+                     <div class="flex items-center gap-4">
+                         <span class="text-xs text-gray-400">0.5x</span>
+                         <input type="range" id="setting-tts-speed" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-gold h-2 bg-charcoal-dark rounded-lg appearance-none cursor-pointer">
+                         <span class="text-xs text-gray-400">2.0x</span>
+                     </div>
+                </div>
             </div>
         </div>
     </div>
