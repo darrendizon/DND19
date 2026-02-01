@@ -17,3 +17,7 @@
 ## 2024-05-27 - Preserving Focus Across Dynamic Updates
 **Learning:** Re-rendering interactive lists (like action buttons) destroys the focused element, resetting focus to `body` and disrupting keyboard navigation flow.
 **Action:** Before clearing a container, capture the `data-key` (or ID) of the `activeElement`. After re-rendering, locate the new corresponding element and call `.focus()` to restore context.
+
+## 2024-05-28 - Immediate Feedback for Sensory Settings
+**Learning:** For settings that affect sensory output (like TTS speed or volume), users need immediate feedback to verify their choice without leaving the menu. Blind users especially rely on hearing the new TTS rate to confirm it's comfortable.
+**Action:** When a sensory setting changes (e.g. `change` event on a slider), trigger a brief sample output (e.g. `speakText(...)`) to preview the new configuration.
