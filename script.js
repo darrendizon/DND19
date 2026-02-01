@@ -155,7 +155,8 @@ const ui = {
     settingTextSize: document.getElementById('setting-text-size'),
     settingLineHeight: document.getElementById('setting-line-height'),
     settingReducedMotion: document.getElementById('setting-reduced-motion'),
-    settingTtsSpeed: document.getElementById('setting-tts-speed')
+    settingTtsSpeed: document.getElementById('setting-tts-speed'),
+    ttsSpeedValue: document.getElementById('tts-speed-value')
 };
 
 // --- CORE GAME LOGIC ---
@@ -700,6 +701,8 @@ const updateSettings = () => {
     localStorage.setItem('setting-reduced-motion', reducedMotion);
     localStorage.setItem('setting-tts-speed', ttsSpeed);
 
+    if (ui.ttsSpeedValue) ui.ttsSpeedValue.textContent = ttsSpeed;
+
     applySettings(contrast, textColor, font, textSize, lineHeight, reducedMotion);
 };
 
@@ -710,6 +713,10 @@ ui.settingTextSize.addEventListener('change', updateSettings);
 ui.settingLineHeight.addEventListener('change', updateSettings);
 ui.settingReducedMotion.addEventListener('change', updateSettings);
 ui.settingTtsSpeed.addEventListener('input', updateSettings);
+
+ui.settingTtsSpeed.addEventListener('change', () => {
+    speakText(`Speed set to ${ui.settingTtsSpeed.value}`);
+});
 
 
 // Load voices when they are ready (Chrome needs this)
