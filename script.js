@@ -155,7 +155,8 @@ const ui = {
     settingTextSize: document.getElementById('setting-text-size'),
     settingLineHeight: document.getElementById('setting-line-height'),
     settingReducedMotion: document.getElementById('setting-reduced-motion'),
-    settingTtsSpeed: document.getElementById('setting-tts-speed')
+    settingTtsSpeed: document.getElementById('setting-tts-speed'),
+    ttsSpeedValue: document.getElementById('tts-speed-value')
 };
 
 // --- CORE GAME LOGIC ---
@@ -442,6 +443,7 @@ function loadSettings() {
     if (ui.settingLineHeight) ui.settingLineHeight.value = lineHeight;
     if (ui.settingReducedMotion) ui.settingReducedMotion.checked = reducedMotion;
     if (ui.settingTtsSpeed) ui.settingTtsSpeed.value = ttsSpeed;
+    if (ui.ttsSpeedValue) ui.ttsSpeedValue.textContent = ttsSpeed + "x";
 
     applySettings(contrast, textColor, font, textSize, lineHeight, reducedMotion);
 }
@@ -691,6 +693,7 @@ const updateSettings = () => {
     const lineHeight = ui.settingLineHeight.value;
     const reducedMotion = ui.settingReducedMotion.checked;
     const ttsSpeed = ui.settingTtsSpeed.value;
+    if (ui.ttsSpeedValue) ui.ttsSpeedValue.textContent = ttsSpeed + "x";
 
     localStorage.setItem('setting-contrast', contrast);
     localStorage.setItem('setting-text-color', textColor);
@@ -710,6 +713,9 @@ ui.settingTextSize.addEventListener('change', updateSettings);
 ui.settingLineHeight.addEventListener('change', updateSettings);
 ui.settingReducedMotion.addEventListener('change', updateSettings);
 ui.settingTtsSpeed.addEventListener('input', updateSettings);
+ui.settingTtsSpeed.addEventListener('change', () => {
+    speakText(`Speed set to ${ui.settingTtsSpeed.value}`);
+});
 
 
 // Load voices when they are ready (Chrome needs this)
