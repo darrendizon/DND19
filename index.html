@@ -286,7 +286,10 @@
 
                 <!-- TTS Speed -->
                 <div class="mt-4">
-                     <label for="setting-tts-speed" class="block text-gold font-bold mb-2">Narrator Speed (TTS)</label>
+                     <div class="flex justify-between items-center mb-2">
+                        <label for="setting-tts-speed" class="block text-gold font-bold">Narrator Speed (TTS)</label>
+                        <span id="tts-speed-value" class="text-gold font-mono font-bold">1.0x</span>
+                     </div>
                      <div class="flex items-center gap-4">
                          <span class="text-xs text-gray-400">0.5x</span>
                          <input type="range" id="setting-tts-speed" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-gold h-2 bg-charcoal-dark rounded-lg appearance-none cursor-pointer">
