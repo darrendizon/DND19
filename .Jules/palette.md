@@ -21,3 +21,7 @@
 ## 2024-05-28 - Immediate Feedback for Sensory Settings
 **Learning:** For settings that affect sensory output (like TTS speed), abstract values (sliders) are insufficient. Users need immediate confirmation of the exact value (visual) and the resulting effect (audio sample) to make informed adjustments without context switching.
 **Action:** Always pair range inputs for sensory settings with a live value display and a `change` listener that triggers a representative sample of the effect.
+
+## 2024-05-29 - Modal Backdrop Interaction
+**Learning:** While keyboard users rely on Escape, mouse users intuitively expect clicking the darkened backdrop (overlay) to dismiss a modal. Missing this interaction feels "broken" and forces unnecessary precision to find the close button.
+**Action:** Always attach a `click` listener to the modal container (backdrop) that dismisses the modal if `e.target === currentTarget`.
