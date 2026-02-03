@@ -684,6 +684,19 @@ ui.btnCloseSettings.addEventListener('click', () => {
     ui.btnSettings.focus();
 });
 
+// Click Outside to Close Modals (Backdrop Click)
+ui.aboutModal.addEventListener('click', (e) => {
+    if (e.target === ui.aboutModal) ui.btnCloseAbout.click();
+});
+
+ui.helpModal.addEventListener('click', (e) => {
+    if (e.target === ui.helpModal) ui.btnCloseHelp.click();
+});
+
+ui.settingsModal.addEventListener('click', (e) => {
+    if (e.target === ui.settingsModal) ui.btnCloseSettings.click();
+});
+
 // Settings Change Listeners
 const updateSettings = () => {
     const contrast = ui.settingContrast.value;
