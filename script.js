@@ -684,6 +684,16 @@ ui.btnCloseSettings.addEventListener('click', () => {
     ui.btnSettings.focus();
 });
 
+// Click Outside to Close Modals
+[ui.aboutModal, ui.helpModal, ui.settingsModal].forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            const closeBtn = modal.querySelector('button[aria-label^="Close"]');
+            if (closeBtn) closeBtn.click();
+        }
+    });
+});
+
 // Settings Change Listeners
 const updateSettings = () => {
     const contrast = ui.settingContrast.value;
