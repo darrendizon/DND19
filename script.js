@@ -626,6 +626,18 @@ ui.btnRepeat.addEventListener('click', () => {
 
 // --- UI & ACCESSIBILITY HANDLERS (Step 3) ---
 
+function setupClickOutside(modal, closeBtn) {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeBtn.click();
+        }
+    });
+}
+
+setupClickOutside(ui.aboutModal, ui.btnCloseAbout);
+setupClickOutside(ui.helpModal, ui.btnCloseHelp);
+setupClickOutside(ui.settingsModal, ui.btnCloseSettings);
+
 ui.btnCreateAccount.addEventListener('click', () => {
     showToast("The spirits of the void prevent account creation at this time.");
 });
